@@ -1,0 +1,45 @@
+week_1_peak,week_4_interest,decay_rate,classification,feature_id,feature_name,company,feature_type
+39.0,11.714285714285714,0.6996336996336996,mixed,1,AI DJ,Spotify,AI/Personalization
+85.0,5.142857142857143,0.9394957983193276,novelty,2,AI Playlist,Spotify,AI/Content
+100.0,0.0,1.0,novelty,3,Wrapped AI Podcast,Spotify,AI/Personalization
+7.0,23.285714285714285,-2.326530612244898,unknown,4,Audiobooks,Spotify,Content Expansion
+8.0,1.8571428571428572,0.7678571428571428,novelty,5,Daylist,Spotify,Personalization
+100.0,7.142857142857143,0.9285714285714286,novelty,6,Password Sharing Crackdown,Netflix,Policy/Monetization
+0.0,0.0,,unknown,7,Profile Transfer,Netflix,User Experience
+0.0,0.0,,unknown,8,Extra Member,Netflix,Monetization
+100.0,7.714285714285714,0.9228571428571428,novelty,9,Ad-Supported Tier,Netflix,Pricing/Monetization
+100.0,24.285714285714285,0.7571428571428572,novelty,10,Games,Netflix,Content Expansion
+57.0,28.428571428571427,0.5012531328320802,mixed,11,Downloads Feature Update,Netflix,User Experience
+100.0,0.0,1.0,novelty,12,Spatial Audio,Netflix,Technical Feature
+48.0,22.571428571428573,0.5297619047619048,mixed,13,Background Play,YouTube Premium,Core Feature
+51.0,25.0,0.5098039215686274,mixed,14,Offline Downloads,YouTube Premium,Core Feature
+0.0,0.0,,unknown,15,Premium Lite,YouTube,Pricing
+72.0,34.714285714285715,0.5178571428571428,mixed,16,Queue Management,YouTube Premium,User Experience
+0.0,0.0,,unknown,18,App-Only Membership,Peloton,Pricing
+0.0,0.0,,unknown,19,Strength Training,Peloton,Content Expansion
+0.0,0.0,,unknown,21,Running Content,Peloton,Content Expansion
+100.0,2.0,0.98,novelty,22,Rowing Classes,Peloton,Content Expansion
+81.0,60.57142857142857,0.2522045855379189,sticky,23,Ad-Supported Tier,Disney+,Pricing/Monetization
+75.0,0.0,1.0,novelty,24,GroupWatch,Disney+,Social Feature
+100.0,0.0,1.0,novelty,25,Downloads Offline,Disney+,Core Feature
+0.0,0.0,,unknown,26,Parental Controls Update,Disney+,User Experience
+100.0,1.5714285714285714,0.9842857142857144,novelty,27,IMAX Enhanced,Disney+,Technical Feature
+100.0,10.857142857142858,0.8914285714285713,novelty,28,Star Content Hub,Disney+,Content Expansion
+34.0,22.142857142857142,0.3487394957983193,mixed,29,ESPN Integration,Disney+,Content Integration
+61.0,8.857142857142858,0.8548009367681498,novelty,30,Premium Plus Tier,Hulu,Pricing
+0.0,0.0,,unknown,31,Live TV Cloud DVR,Hulu,Feature Enhancement
+0.0,41.0,,unknown,32,Watch Party,Hulu,Social Feature
+47.0,9.428571428571429,0.7993920972644376,novelty,34,Multiview,YouTube TV,User Experience
+100.0,11.142857142857142,0.8885714285714286,novelty,35,Price Increase,YouTube TV,Pricing
+0.0,0.0,,unknown,36,Unlimited DVR,YouTube TV,Core Feature
+47.0,0.0,1.0,novelty,37,AI Playlist,Spotify,AI/Content
+62.0,0.0,1.0,novelty,38,Background Play,YouTube Premium,Core Feature
+0.0,0.0,,unknown,39,Premium Lite,YouTube,Pricing
+0.0,0.0,,unknown,40,Strength Training,Peloton,Content Expansion
+0.0,0.0,,unknown,41,Live TV Cloud DVR,Hulu,Feature Enhancement
+0.0,14.285714285714286,,unknown,42,Download to Watch Offline,Paramount+,Core Feature
+100.0,9.571428571428571,0.9042857142857144,novelty,43,Lossless Audio,Apple Music,Technical Feature
+100.0,12.571428571428571,0.8742857142857143,novelty,44,Sing Feature,Apple Music,User Experience
+100.0,2.0,0.98,novelty,45,Classical App,Apple Music,Product Launch
+0.0,0.0,,unknown,47,Grok AI,X Premium,AI Feature
+100.0,0.0,1.0,novelty,49,Premium Price Increase,Spotify,Pricing

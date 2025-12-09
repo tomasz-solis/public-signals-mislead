@@ -1,0 +1,51 @@
+feature_id,feature_name,company,launch_date,feature_type,announcement_source,google_trends_keyword,expected_stickiness,notes
+1,AI DJ,Spotify,2023-02-22,AI/Personalization,https://newsroom.spotify.com/2023-02-22/spotify-debuts-a-new-ai-dj-right-in-your-pocket/,Spotify AI DJ,sticky,Initially US/Canada only; 25% listening time reported
+2,AI Playlist,Spotify,2024-04-07,AI/Content,https://newsroom.spotify.com/2024-04-07/spotify-premium-users-can-now-turn-any-idea-into-a-personalized-playlist-with-ai-playlist-in-beta/,Spotify AI Playlist,unknown,UK/Australia launch; expanded Sept 2024
+3,Wrapped AI Podcast,Spotify,2024-12-04,AI/Personalization,https://newsroom.spotify.com/2024-12-04/wrapped-user-experience-2024/,Spotify Wrapped AI,novelty,Wrapped is annual - likely novelty spike
+4,Audiobooks,Spotify,2023-09-13,Content Expansion,Press release,Spotify Audiobooks,sticky,Premium tier gets 15 hours/month
+5,Daylist,Spotify,2023-09-12,Personalization,Press release,Spotify Daylist,unknown,Dynamic playlist that changes throughout day
+6,Password Sharing Crackdown,Netflix,2023-05-23,Policy/Monetization,https://about.netflix.com/en/news/an-update-on-sharing,Netflix password sharing,sticky,9.33M new subs Q1 2024 reported
+7,Profile Transfer,Netflix,2022-10-17,User Experience,https://about.netflix.com/en/news/introducing-profile-transfer,Netflix profile transfer,sticky,Enables easy migration for password sharers
+8,Extra Member,Netflix,2023-02-01,Monetization,Press release,Netflix extra member,sticky,$7.99/month add-on
+9,Ad-Supported Tier,Netflix,2022-11-03,Pricing/Monetization,Press release,Netflix with ads,sticky,$6.99/month tier
+10,Games,Netflix,2021-11-02,Content Expansion,Press release,Netflix games,novelty,Mobile games included with subscription
+11,Downloads Feature Update,Netflix,2021-11-03,User Experience,Blog post,Netflix downloads,unknown,Expanded download limits
+12,Spatial Audio,Netflix,2022-07-07,Technical Feature,Press release,Netflix spatial audio,novelty,Audio enhancement feature
+13,Background Play,YouTube Premium,2014-11-12,Core Feature,Launch,YouTube background play,sticky,Premium's killer feature
+14,Offline Downloads,YouTube Premium,2014-11-12,Core Feature,Launch,YouTube offline,sticky,Download videos for offline viewing
+15,Premium Lite,YouTube,2021-06-08,Pricing,Press release,YouTube Premium Lite,unknown,Ad-free only tier (Europe)
+16,Queue Management,YouTube Premium,2023-03-15,User Experience,App update,YouTube queue,novelty,Better playlist management
+17,1080p Premium,YouTube Premium,2015-10-28,Technical Feature,Announcement,YouTube 1080p premium,novelty,Higher quality streaming
+18,App-Only Membership,Peloton,2015-10-28,Pricing,https://investor.onepeloton.com/,Peloton app only,sticky,$12.99/month no equipment needed
+19,Strength Training,Peloton,2021-08-01,Content Expansion,Press release,Peloton strength,sticky,Major content category expansion
+20,Meditation Classes,Peloton,2021-09-01,Content Expansion,Press release,Peloton meditation,unknown,Wellness expansion beyond fitness
+21,Running Content,Peloton,2023-02-23,Content Expansion,Press release,Peloton running,sticky,Outdoor running classes
+22,Rowing Classes,Peloton,2022-09-15,Content Expansion,Press release,Peloton rowing,unknown,New equipment category
+23,Ad-Supported Tier,Disney+,2022-12-08,Pricing/Monetization,Press release,Disney Plus ads,sticky,$7.99/month tier
+24,GroupWatch,Disney+,2020-09-29,Social Feature,Press release,Disney Plus GroupWatch,novelty,Watch parties feature
+25,Downloads Offline,Disney+,2019-11-12,Core Feature,Launch,Disney Plus downloads,sticky,Offline viewing
+26,Parental Controls Update,Disney+,2021-03-26,User Experience,Press release,Disney Plus parental controls,unknown,Enhanced content filtering
+27,IMAX Enhanced,Disney+,2021-11-12,Technical Feature,Press release,Disney Plus IMAX,novelty,Enhanced aspect ratio for select titles
+28,Star Content Hub,Disney+,2021-02-23,Content Expansion,Press release,Disney Plus Star,sticky,More adult content (international)
+29,ESPN Integration,Disney+,2024-12-04,Content Integration,Press release,Disney Plus ESPN,unknown,Sports content bundling
+30,Premium Plus Tier,Hulu,2023-10-12,Pricing,Press release,Hulu Premium Plus,unknown,No ads + more features
+31,Live TV Cloud DVR,Hulu,2023-04-15,Feature Enhancement,Press release,Hulu DVR,sticky,Unlimited cloud DVR
+32,Watch Party,Hulu,2020-05-14,Social Feature,Press release,Hulu Watch Party,novelty,Co-viewing feature
+33,NFL Sunday Ticket,YouTube TV,2023-09-01,Content,Press release,YouTube TV NFL,sticky,Major sports rights acquisition
+34,Multiview,YouTube TV,2023-10-01,User Experience,Press release,YouTube TV multiview,sticky,Watch 4 streams simultaneously
+35,Price Increase,YouTube TV,2023-03-16,Pricing,Announcement,YouTube TV price,novelty,Negative feature launch
+36,Unlimited DVR,YouTube TV,2019-06-01,Core Feature,Announcement,YouTube TV DVR,sticky,Cloud DVR with no limits
+37,Download to Watch Offline,Paramount+,2023-06-20,Core Feature,Press release,Paramount Plus downloads,sticky,Offline viewing
+38,Showtime Integration,Paramount+,2023-06-27,Content Integration,Press release,Paramount Showtime,sticky,Merged services
+39,Live Sports,Paramount+,2022-03-01,Content Expansion,Press release,Paramount Plus sports,sticky,CBS Sports included
+40,Essential Plan,Paramount+,2021-06-07,Pricing,Launch,Paramount Plus essential,sticky,$4.99 ad-supported tier
+41,Family Plan,Apple Music,2023-10-15,Pricing,Announcement,Apple Music family,sticky,Up to 6 people $16.99/month
+42,Dolby Atmos,Apple Music,2021-06-07,Technical Feature,Press release,Apple Music Atmos,novelty,Spatial audio
+43,Lossless Audio,Apple Music,2021-06-07,Technical Feature,Press release,Apple Music lossless,novelty,Hi-fi streaming
+44,Sing Feature,Apple Music,2022-12-13,User Experience,Press release,Apple Music Sing,novelty,Karaoke-style lyrics
+45,Classical App,Apple Music,2023-03-28,Product Launch,Press release,Apple Music Classical,unknown,Dedicated classical music app
+46,X Premium Blue,Twitter/X,2023-01-21,Monetization,Announcement,Twitter Blue premium,unknown,Rebranded verification
+47,Grok AI,X Premium,2023-12-07,AI Feature,Announcement,X Grok AI,unknown,AI chatbot for Premium users
+48,Longer Videos,X Premium,2023-08-11,Content Feature,Announcement,X Premium videos,unknown,Extended video uploads
+49,Premium Price Increase,Spotify,2023-07-24,Pricing,Announcement,Spotify price increase,novelty,Negative feature launch
+50,AI Voice Translation,Spotify,2023-09-25,AI/Content,Press release,Spotify voice translation,novelty,Podcast translation feature

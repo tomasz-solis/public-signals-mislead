@@ -1,0 +1,14 @@
+legacy/
+venv/
+__pycache__/
+.ipynb_checkpoints/.env
+.env
+.DS_Store
+
+data/raw/batches/
+data/trends/backup/
+data/trends/longterm/
+data/trends/full_decay_metrics_batch_*.csv
+data/trends/full_trends_data_batch_*.csv
+
+PERSONAL_LEARNINGS.md
