@@ -183,9 +183,9 @@ You need additional signals:
 
 Tomasz Solis
 - Email: tomasz.solis@gmail.com
-- LinkedIn: linkedin.com/in/tomaszsolis
-- GitHub: github.com/tomasz-solis
+- [LinkedIn](linkedin.com/in/tomaszsolis)
+- [GitHub](github.com/tomasz-solis)
 
 ## License
 
-MIT - Use this however you want.
+MIT
