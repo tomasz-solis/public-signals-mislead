@@ -8,6 +8,7 @@ Usage:
 """
 
 import argparse
+import logging
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,6 +17,11 @@ from typing import Dict, List, Tuple, Optional
 import pandas as pd
 from pytrends.request import TrendReq
 from tqdm import tqdm
+
+from config.thresholds import DECAY_NOVELTY_THRESHOLD, DECAY_STICKY_THRESHOLD
+
+
+logger = logging.getLogger(__name__)
 
 
 class TrendsCollector:
@@ -51,7 +57,11 @@ class TrendsCollector:
         Returns empty DataFrame if all retries fail or no data found.
         """
         if not isinstance(keyword, str) or not keyword.strip():
-            tqdm.write(f"⚠ Skipping feature_id={feature_id} ('{feature_name}') - missing keyword")
+            logger.warning(
+                "Skipping feature_id=%s (%s) because the keyword is missing.",
+                feature_id,
+                feature_name,
+            )
             return pd.DataFrame()
 
         timeframe = self.get_feature_timeframe(launch_date)
@@ -63,7 +73,11 @@ class TrendsCollector:
                 trends_data = self.pytrends.interest_over_time()
 
                 if trends_data.empty:
-                    tqdm.write(f"⚠ No data for '{keyword}' (feature_id={feature_id}) - too low volume")
+                    logger.warning(
+                        "No trends data for keyword=%s (feature_id=%s); likely too low volume.",
+                        keyword,
+                        feature_id,
+                    )
                     return pd.DataFrame()
 
                 # Clean and format
@@ -83,11 +97,23 @@ class TrendsCollector:
                 if attempt < self.max_retries and is_rate_limit:
                     delay_idx = min(attempt - 1, len(self.backoff_schedule) - 1)
                     delay = self.backoff_schedule[delay_idx]
-                    tqdm.write(f"⏳ Rate-limited '{feature_name}' [attempt {attempt}/{self.max_retries}] - sleeping {delay}s")
+                    logger.warning(
+                        "Rate-limited while collecting %s on attempt %s/%s; sleeping %ss.",
+                        feature_name,
+                        attempt,
+                        self.max_retries,
+                        delay,
+                    )
                     time.sleep(delay)
                     continue
 
-                tqdm.write(f"✗ Error collecting '{feature_name}' on attempt {attempt}/{self.max_retries}: {msg}")
+                logger.error(
+                    "Error collecting %s on attempt %s/%s: %s",
+                    feature_name,
+                    attempt,
+                    self.max_retries,
+                    msg,
+                )
                 return pd.DataFrame()
 
         return pd.DataFrame()
@@ -117,7 +143,7 @@ class TrendsCollector:
         week_4_interest = week_4_data["interest"].mean() if not week_4_data.empty else None
 
         # Calculate decay
-        if week_1_peak and week_1_peak > 0 and week_4_interest is not None:
+        if week_1_peak is not None and week_1_peak > 0 and week_4_interest is not None:
             decay_rate = (week_1_peak - week_4_interest) / week_1_peak
         else:
             decay_rate = None
@@ -125,9 +151,9 @@ class TrendsCollector:
         # Classify
         if decay_rate is None or decay_rate < 0:
             classification = "unknown"
-        elif decay_rate < 0.30:
+        elif decay_rate < DECAY_STICKY_THRESHOLD:
             classification = "sticky"
-        elif decay_rate < 0.70:
+        elif decay_rate < DECAY_NOVELTY_THRESHOLD:
             classification = "mixed"
         else:
             classification = "novelty"
@@ -146,9 +172,9 @@ class TrendsCollector:
         """
         if pilot_only:
             features_df = features_df.head(10)
-            print(f"\n🚀 Collecting {len(features_df)} PILOT features\n")
+            logger.info("Collecting %s pilot features.", len(features_df))
         else:
-            print(f"\n🚀 Collecting ALL {len(features_df)} features\n")
+            logger.info("Collecting %s features.", len(features_df))
 
         all_trends: List[pd.DataFrame] = []
         all_metrics: List[Dict] = []
@@ -181,7 +207,7 @@ class TrendsCollector:
                     pilot: bool = False, batch_name: Optional[str] = None) -> None:
         """Save trends data and metrics to CSV files."""
         prefix = "pilot_" if pilot else "full_"
-        suffix = batch_name if batch_name else 'batch_extended_extreme_peaks'
+        suffix = batch_name if batch_name else "batch"
 
         trends_path = self.data_dir / f"{prefix}trends_data_{suffix}.csv"
         metrics_path = self.data_dir / f"{prefix}decay_metrics_{suffix}.csv"
@@ -189,28 +215,41 @@ class TrendsCollector:
         trends_df.to_csv(trends_path, index=False)
         metrics_df.to_csv(metrics_path, index=False)
 
-        print(f"\n✓ Saved trends: {trends_path}")
-        print(f"✓ Saved metrics: {metrics_path}")
+        logger.info("Saved trends data to %s", trends_path)
+        logger.info("Saved decay metrics to %s", metrics_path)
 
         # Summary
         if metrics_df.empty:
-            print("\nCollected 0 features (all failed due to rate limits or no data)")
+            logger.warning("Collected 0 features; all requests failed or returned no data.")
             return
 
         n_features = metrics_df["feature_id"].nunique() if "feature_id" in metrics_df.columns else len(metrics_df)
-        print(f"\nCollected {n_features} features")
+        logger.info("Collected %s features.", n_features)
 
         if "classification" in metrics_df.columns:
-            print("\nClassification:")
-            print(metrics_df["classification"].value_counts(dropna=False).to_string())
+            logger.info("Classification breakdown:\n%s", metrics_df["classification"].value_counts(dropna=False).to_string())
 
         if "decay_rate" in metrics_df.columns and metrics_df["decay_rate"].notna().any():
             avg_decay = metrics_df["decay_rate"].mean()
-            print(f"\nAverage decay rate: {avg_decay:.2%}")
+            logger.info("Average decay rate: %.2f%%", avg_decay * 100)
+
+
+def _configure_logging() -> None:
+    """Configure console and file logging for collection runs."""
+    Path("data").mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler("data/collection.log"),
+        ],
+    )
 
 
 def main() -> None:
     """CLI entry point."""
+    _configure_logging()
     parser = argparse.ArgumentParser(description="Collect Google Trends data for features")
     parser.add_argument("--pilot", action="store_true", help="Collect first 10 features only")
     parser.add_argument("--full", action="store_true", help="Collect all features")
@@ -220,12 +259,12 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.pilot and not args.full:
-        print("✗ Specify either --pilot or --full")
+        logger.error("Specify either --pilot or --full.")
         return
 
-    print(f"📂 Loading features from: {args.input}")
+    logger.info("Loading features from %s", args.input)
     features_df = pd.read_csv(args.input)
-    print(f"   Loaded {len(features_df)} features")
+    logger.info("Loaded %s features.", len(features_df))
 
     # Extract batch name from path
     input_path = Path(args.input)
@@ -235,7 +274,7 @@ def main() -> None:
     trends_df, metrics_df = collector.collect_all_features(features_df, pilot_only=args.pilot)
     collector.save_results(trends_df, metrics_df, pilot=args.pilot, batch_name=batch_name)
 
-    print("\n🎉 Data collection complete")
+    logger.info("Data collection complete.")
 
 
 if __name__ == "__main__":

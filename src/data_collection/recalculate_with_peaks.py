@@ -12,11 +12,26 @@ This script:
 Usage: python src/data_collection/recalculate_with_peaks.py --input data/trends/MERGED_trends_data.csv
 """
 
-import pandas as pd
 import argparse
+import logging
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict, Tuple
+
+import pandas as pd
+
+from config.thresholds import DECAY_NOVELTY_THRESHOLD, DECAY_STICKY_THRESHOLD
+
+
+logger = logging.getLogger(__name__)
+
+
+def _validate_trends_schema(trends_df: pd.DataFrame) -> None:
+    """Fail early when the merged trends file is missing required columns."""
+    required_cols = {"feature_name", "interest", "date", "launch_date"}
+    missing = required_cols - set(trends_df.columns)
+    if missing:
+        raise ValueError(f"trends_df is missing required columns: {sorted(missing)}")
 
 
 def find_peak_date(trends_df: pd.DataFrame, feature_name: str) -> Tuple[pd.Timestamp, float]:
@@ -72,9 +87,9 @@ def calculate_peak_based_decay(trends_df: pd.DataFrame, feature_name: str,
     # Classify based on Week 4 decay
     if decay_rate_w4 is None or decay_rate_w4 < 0:
         classification = 'unknown'
-    elif decay_rate_w4 < 0.30:
+    elif decay_rate_w4 < DECAY_STICKY_THRESHOLD:
         classification = 'sticky'
-    elif decay_rate_w4 < 0.70:
+    elif decay_rate_w4 < DECAY_NOVELTY_THRESHOLD:
         classification = 'mixed'
     else:
         classification = 'novelty'
@@ -92,12 +107,14 @@ def calculate_peak_based_decay(trends_df: pd.DataFrame, feature_name: str,
 
 def recalculate_all_metrics(trends_df: pd.DataFrame) -> pd.DataFrame:
     """Recalculate metrics for all features using peak-based methodology."""
+    _validate_trends_schema(trends_df)
     trends_df['date'] = pd.to_datetime(trends_df['date'])
     trends_df['launch_date'] = pd.to_datetime(trends_df['launch_date'])
     
     results = []
     
     for feature_name in trends_df['feature_name'].unique():
+        logger.debug("Recalculating peak metrics for %s", feature_name)
         feature_data = trends_df[trends_df['feature_name'] == feature_name].iloc[0]
         
         peak_date, peak_interest = find_peak_date(trends_df, feature_name)
@@ -125,7 +142,7 @@ def recalculate_all_metrics(trends_df: pd.DataFrame) -> pd.DataFrame:
     return results_df.sort_values('decay_rate_w4')
 
 
-def print_analysis(metrics_df: pd.DataFrame):
+def print_analysis(metrics_df: pd.DataFrame) -> None:
     """Print analysis of recalculated metrics."""
     print("\nRECALCULATED METRICS - Peak-Based Methodology\n")
     
@@ -161,8 +178,12 @@ def print_analysis(metrics_df: pd.DataFrame):
         print(f"  Classification: {delayed['classification'].value_counts().to_dict()}")
 
 
-def main():
+def main() -> None:
     """Main execution."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+    )
     parser = argparse.ArgumentParser(description='Recalculate metrics using peak dates')
     parser.add_argument('--input', type=str, required=True, help='Path to trends data CSV')
     parser.add_argument('--output', type=str, default=None,

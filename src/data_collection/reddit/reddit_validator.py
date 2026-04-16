@@ -2,7 +2,8 @@
 Reddit sentiment validation for feature launches.
 
 Combines Reddit mentions + sentiment analysis with Google Trends decay data to classify
-feature adoption patterns. Core logic for distinguishing success from failure.
+public-signal patterns around launches. Core logic for spotting where external
+discussion may support or distort a product decision conversation.
 
 Classification:
 - High decay + positive sentiment + high mentions = ADOPTION (learned, stopped searching)
@@ -20,6 +21,13 @@ from collections import Counter
 
 import pandas as pd
 
+from config.thresholds import (
+    DECAY_NOVELTY_THRESHOLD,
+    DECAY_STICKY_THRESHOLD,
+    HIGH_ENGAGEMENT_MENTION_THRESHOLD,
+    LOW_AWARENESS_MENTION_THRESHOLD,
+    NEGATIVE_SIGNAL_NEGATIVE_RATIO_THRESHOLD,
+)
 from .reddit_config import (
     FEATURE_OVERRIDES, FEATURE_COMPANY_GUARDS, FEATURE_EXPANSIONS,
     MAX_KEYWORDS_PER_FEATURE, COMPANY_SUBREDDITS
@@ -146,8 +154,11 @@ def generate_keywords(feature_name: str, company: str) -> List[str]:
 
 class RedditValidator:
     """
-    Validates feature success using Reddit sentiment + Google Trends decay.
-    Multi-signal validation framework for product analytics.
+    Collect Reddit reaction signals for feature launches.
+
+    The class measures public discussion patterns such as mention volume and
+    sentiment. Those signals help describe outside perception, but they are not
+    treated as proof of product success or failure.
     """
 
     def __init__(self, use_praw: bool = True):
@@ -315,11 +326,14 @@ class RedditValidator:
                 "explanation": "Decay metrics not available - can't classify adoption vs abandonment. Sentiment reported."
             }
 
-        high_decay = search_decay > 0.70
-        low_decay = search_decay < 0.30
+        high_decay = search_decay > DECAY_NOVELTY_THRESHOLD
+        low_decay = search_decay < DECAY_STICKY_THRESHOLD
         positive = sentiment["sentiment_label"] == "positive"
-        negative = sentiment["sentiment_label"] == "negative"
-        high_mentions = sentiment["total_mentions"] > 20
+        negative = (
+            sentiment["sentiment_label"] == "negative"
+            or sentiment["negative_ratio"] > NEGATIVE_SIGNAL_NEGATIVE_RATIO_THRESHOLD
+        )
+        high_mentions = sentiment["total_mentions"] > HIGH_ENGAGEMENT_MENTION_THRESHOLD
 
         if high_decay and positive and high_mentions:
             return {
@@ -336,7 +350,7 @@ class RedditValidator:
                 "classification": "SUSTAINED_INTEREST",
                 "explanation": "Low decay + positive sentiment → true ongoing interest (rare)"
             }
-        elif high_decay and sentiment["total_mentions"] < 10:
+        elif high_decay and sentiment["total_mentions"] < LOW_AWARENESS_MENTION_THRESHOLD:
             return {
                 "classification": "LOW_AWARENESS",
                 "explanation": "High decay + few mentions → never gained traction"

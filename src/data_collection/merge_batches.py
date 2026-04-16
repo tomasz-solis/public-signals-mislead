@@ -19,13 +19,23 @@ import pandas as pd
 
 DATA_DIR = Path("data/trends")
 EXTENDED_TAG = "extended_extreme_peaks"
+TRENDS_REQUIRED_COLUMNS = {"feature_id", "feature_name", "date", "interest", "launch_date"}
+METRICS_REQUIRED_COLUMNS = {"feature_id", "feature_name", "decay_rate"}
 
 
-def _load_with_source(files: List[Path]) -> pd.DataFrame:
+def _validate_schema(df: pd.DataFrame, required_columns: set, source_name: str) -> None:
+    """Raise a clear error when a batch file does not match the expected schema."""
+    missing = required_columns - set(df.columns)
+    if missing:
+        raise ValueError(f"Schema error in '{source_name}': missing columns {sorted(missing)}")
+
+
+def _load_with_source(files: List[Path], required_columns: set) -> pd.DataFrame:
     """Load CSVs and tag each row with its source filename."""
     dfs = []
     for f in files:
         df = pd.read_csv(f)
+        _validate_schema(df, required_columns, f.name)
         df["source_file"] = f.name
         dfs.append(df)
     if not dfs:
@@ -45,7 +55,7 @@ def merge_trends() -> pd.DataFrame:
     for f in trend_files:
         print(f"   - {f.name}")
 
-    trends = _load_with_source(trend_files)
+    trends = _load_with_source(trend_files, TRENDS_REQUIRED_COLUMNS)
 
     if trends.empty:
         raise ValueError("Loaded trends data is empty")
@@ -93,7 +103,7 @@ def merge_metrics() -> pd.DataFrame:
     for f in metric_files:
         print(f"   - {f.name}")
 
-    metrics = _load_with_source(metric_files)
+    metrics = _load_with_source(metric_files, METRICS_REQUIRED_COLUMNS)
 
     if metrics.empty:
         raise ValueError("Loaded metrics data is empty")
