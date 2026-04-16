@@ -17,52 +17,61 @@ echo "  Public Signals Mislead: Complete Analysis"
 echo "================================================================================"
 echo ""
 
-# Check Python version
-echo -e "${BLUE}Checking Python version...${NC}"
-python_version=$(python --version 2>&1 | awk '{print $2}')
-echo "  Python version: $python_version"
-echo ""
-
-# Check required packages
-echo -e "${BLUE}Checking required packages...${NC}"
-missing_packages=""
-
-if ! python -c "import pandas" 2>/dev/null; then
-    missing_packages="$missing_packages pandas"
+# Resolve Python command
+BOOTSTRAP_PYTHON=""
+if [ -x "venv/bin/python" ]; then
+    PYTHON_CMD="venv/bin/python"
+elif [ -x ".venv/bin/python" ]; then
+    PYTHON_CMD=".venv/bin/python"
+elif command -v python >/dev/null 2>&1; then
+    BOOTSTRAP_PYTHON="python"
+    PYTHON_CMD="python"
+elif command -v python3 >/dev/null 2>&1; then
+    BOOTSTRAP_PYTHON="python3"
+    PYTHON_CMD="python3"
+else
+    echo -e "${YELLOW}No Python interpreter found on PATH.${NC}"
+    exit 1
 fi
 
-if ! python -c "import scipy" 2>/dev/null; then
-    missing_packages="$missing_packages scipy"
-fi
-
-if ! python -c "import plotly" 2>/dev/null; then
-    missing_packages="$missing_packages plotly"
-fi
-
-if [ -n "$missing_packages" ]; then
-    echo -e "${YELLOW}⚠️  Missing packages:$missing_packages${NC}"
-    echo "Installing..."
-    pip install $missing_packages
+if [ ! -x "venv/bin/python" ] && [ ! -x ".venv/bin/python" ]; then
+    echo -e "${BLUE}Creating local virtual environment...${NC}"
+    $BOOTSTRAP_PYTHON -m venv venv
+    PYTHON_CMD="venv/bin/python"
     echo ""
 fi
 
-echo -e "${GREEN}✅ All packages installed${NC}"
+# Check Python version
+echo -e "${BLUE}Checking Python version...${NC}"
+python_version=$($PYTHON_CMD --version 2>&1 | awk '{print $2}')
+echo "  Python version: $python_version"
 echo ""
 
-# Step 1: Apply outcomes
+# Check project install
+echo -e "${BLUE}Checking project install...${NC}"
+if ! $PYTHON_CMD -c "import src, config, pandas, scipy, plotly" 2>/dev/null; then
+    echo -e "${BLUE}Installing project in editable mode...${NC}"
+    $PYTHON_CMD -m pip install -e .
+    echo ""
+fi
+
+echo -e "${GREEN}✅ Project environment ready${NC}"
+echo ""
+
+# Step 1: Apply decision context
 echo "================================================================================"
-echo "  Step 1/3: Applying Business Outcomes"
+echo "  Step 1/3: Applying Decision Context"
 echo "================================================================================"
 echo ""
-python scripts/apply_outcomes.py
+$PYTHON_CMD scripts/apply_outcomes.py
 echo ""
 
 # Step 2: Statistical analysis
 echo "================================================================================"
-echo "  Step 2/3: Running Statistical Tests"
+echo "  Step 2/3: Running Decision-Support Analysis"
 echo "================================================================================"
 echo ""
-python src/analysis/statistical_analysis.py
+$PYTHON_CMD src/analysis/statistical_analysis.py
 echo ""
 
 # Step 3: Generate visualizations
@@ -70,7 +79,7 @@ echo "==========================================================================
 echo "  Step 3/3: Generating Interactive Charts"
 echo "================================================================================"
 echo ""
-python scripts/generate_visualizations.py
+$PYTHON_CMD scripts/generate_visualizations.py
 echo ""
 
 # Summary
@@ -83,7 +92,7 @@ echo "  📊 Statistical results: data/validation/statistical_results.csv"
 echo "  📈 Interactive charts:  results/figures/*.html"
 echo ""
 echo "View main chart:"
-echo "  open results/figures/decay_vs_outcome.html"
+echo "  open results/figures/decay_vs_action.html"
 echo ""
 echo "Or browse all charts:"
 echo "  open results/figures/"

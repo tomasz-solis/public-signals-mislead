@@ -1,102 +1,150 @@
 """
-Apply known business outcomes to labeled features CSV.
+Apply public decision context to the labeled feature CSV.
 
-Run once to populate labeled_features.csv with verified outcomes from config/outcomes.py.
+This script keeps two ideas separate:
+- `company_action`: what the company publicly appears to have done
+- `business_outcome`: what the public record can actually prove about value
 
 Usage: python scripts/apply_outcomes.py
 """
 
-import pandas as pd
 from pathlib import Path
-import sys
+
+import pandas as pd
+
+from config.outcomes import get_feature_context, get_feature_type
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
+ACTION_BINARY_MAP = {"SUPPORTED": 1, "PULLED_BACK": 0}
+BUSINESS_OUTCOME_BINARY_MAP = {"POSITIVE": 1, "NEGATIVE": 0}
+LEGACY_COLUMNS = [
+    "known_outcome",
+    "outcome_metric",
+    "outcome_label",
+    "is_success",
+    "is_failure",
+    "success_binary",
+]
 
-from config.outcomes import KNOWN_OUTCOMES, get_outcome, get_feature_type
+
+def _context_value(feature_name: str, key: str, default: str = "UNKNOWN") -> str:
+    """Return one field from the feature context with a small default."""
+    context = get_feature_context(feature_name)
+    if not context:
+        return default
+    return context.get(key, default)
 
 
-def apply_outcomes_to_csv():
-    """
-    Apply known business outcomes from config to the labeled features CSV.
-    Updates columns for success/failure labels and metrics.
-    """
-    csv_path = PROJECT_ROOT / 'data' / 'validation' / 'labeled_features.csv'
+def apply_outcomes_to_csv() -> pd.DataFrame:
+    """Apply company-action and business-outcome context to the labeled feature CSV."""
+    csv_path = PROJECT_ROOT / "data" / "validation" / "labeled_features.csv"
     df = pd.read_csv(csv_path)
-    
+    df = df.drop(columns=LEGACY_COLUMNS, errors="ignore")
+
     print(f"Loaded {len(df)} features from {csv_path.relative_to(PROJECT_ROOT)}")
     print(f"Companies: {', '.join(df['company'].unique())}\n")
-    
-    # Apply outcomes from config
-    df['known_outcome'] = df['feature_name'].apply(
-        lambda x: get_outcome(x).get('outcome', 'UNKNOWN') if get_outcome(x) else 'UNKNOWN'
+
+    has_context = df["feature_name"].apply(lambda name: bool(get_feature_context(name)))
+    df["company_action"] = df["feature_name"].apply(lambda name: _context_value(name, "company_action"))
+    df["business_outcome"] = df["feature_name"].apply(lambda name: _context_value(name, "business_outcome"))
+    df["evidence_summary"] = df["feature_name"].apply(
+        lambda name: _context_value(name, "evidence_summary", default="No public context yet")
     )
-    df['outcome_metric'] = df['feature_name'].apply(
-        lambda x: get_outcome(x).get('metric', 'No verified data') if get_outcome(x) else 'No verified data'
+    df["evidence_source"] = df["feature_name"].apply(
+        lambda name: _context_value(name, "source", default="No public context yet")
     )
-    df['feature_type_calc'] = df['feature_name'].apply(get_feature_type)
-    
-    # Binary labels for statistical analysis
-    df['is_success'] = df['known_outcome'].isin(['SUCCESS', 'MODERATE_SUCCESS']).astype(int)
-    df['is_failure'] = df['known_outcome'].isin(['FAILURE', 'WEAK']).astype(int)
-    
-    # Simplified outcome label
-    df['outcome_label'] = df['known_outcome'].map({
-        'SUCCESS': 'success',
-        'MODERATE_SUCCESS': 'success',
-        'FAILURE': 'failure',
-        'WEAK': 'failure',
-        'UNKNOWN': 'unknown'
-    })
-    
+    df["evidence_tier"] = df["feature_name"].apply(
+        lambda name: _context_value(name, "evidence_tier", default="UNLABELED")
+    )
+    df["evidence_url"] = df["feature_name"].apply(
+        lambda name: _context_value(name, "url", default="")
+    )
+    df["evidence_caveat"] = df["feature_name"].apply(
+        lambda name: _context_value(name, "caveat", default="")
+    )
+    df["feature_type_calc"] = df["feature_name"].apply(get_feature_type)
+    df["action_binary"] = df["company_action"].map(ACTION_BINARY_MAP).astype("Int64")
+    df["business_outcome_binary"] = df["business_outcome"].map(BUSINESS_OUTCOME_BINARY_MAP).astype("Int64")
+
     df.to_csv(csv_path, index=False)
-    
-    # Print summary
-    success_count = df['is_success'].sum()
-    failure_count = df['is_failure'].sum()
-    unknown_count = (df['known_outcome'] == 'UNKNOWN').sum()
-    
-    tier1_success = len(df[df['known_outcome'] == 'SUCCESS'])
-    tier2_success = len(df[df['known_outcome'] == 'MODERATE_SUCCESS'])
-    
-    print(f"✓ Updated {csv_path.relative_to(PROJECT_ROOT)}")
-    print(f"\n✓ {success_count} successes (Tier 1: {tier1_success}, Tier 2: {tier2_success})")
-    print(f"✗ {failure_count} failures")
-    print(f"? {unknown_count} unknown (need research)\n")
-    
-    # Show successes
-    if success_count > 0:
-        print("Successes:")
-        successes = df[df['is_success'] == 1][['feature_name', 'company', 'known_outcome', 'outcome_metric']].sort_values('known_outcome')
-        for _, row in successes.iterrows():
-            icon = "⭐" if row['known_outcome'] == 'SUCCESS' else "✓"
-            print(f"  {icon} {row['feature_name']} ({row['company']})")
-            print(f"     {row['outcome_metric']}")
+
+    supported_count = int((df["company_action"] == "SUPPORTED").sum())
+    pulled_back_count = int((df["company_action"] == "PULLED_BACK").sum())
+    action_unknown_count = int((df["company_action"] == "UNKNOWN").sum())
+    action_labeled_count = int(df["action_binary"].notna().sum())
+    positive_count = int((df["business_outcome"] == "POSITIVE").sum())
+    negative_count = int((df["business_outcome"] == "NEGATIVE").sum())
+    outcome_unknown_count = int((df["business_outcome"] == "UNKNOWN").sum())
+    context_count = int(has_context.sum())
+    no_context_count = int((~has_context).sum())
+
+    print(f"Updated {csv_path.relative_to(PROJECT_ROOT)}")
+    print("\nObserved company action:")
+    print(f"  Supported: {supported_count}")
+    print(f"  Pulled back: {pulled_back_count}")
+    print(f"  Unknown: {action_unknown_count}")
+    print(f"  Action-labeled sample used in analysis: {action_labeled_count}")
+
+    print("\nKnown business outcome coverage:")
+    print(f"  Positive: {positive_count}")
+    print(f"  Negative: {negative_count}")
+    print(f"  Unknown: {outcome_unknown_count}")
+
+    print("\nContext coverage:")
+    print(f"  Features with public decision context: {context_count}")
+    print(f"  Features still needing context research: {no_context_count}\n")
+
+    supported = df[df["company_action"] == "SUPPORTED"][
+        ["feature_name", "company", "business_outcome", "evidence_summary"]
+    ]
+    if not supported.empty:
+        print("Supported features:")
+        for _, row in supported.sort_values("business_outcome", ascending=False).iterrows():
+            outcome_text = row["business_outcome"].lower()
+            print(f"  + {row['feature_name']} ({row['company']}) [{outcome_text}]")
+            print(f"    {row['evidence_summary']}")
         print()
-    
-    # Show failures
-    if failure_count > 0:
-        print("Failures:")
-        failures = df[df['is_failure'] == 1][['feature_name', 'company', 'outcome_metric']]
-        for _, row in failures.iterrows():
-            print(f"  ✗ {row['feature_name']} ({row['company']})")
-            print(f"     {row['outcome_metric']}")
+
+    pulled_back = df[df["company_action"] == "PULLED_BACK"][
+        ["feature_name", "company", "business_outcome", "evidence_summary"]
+    ]
+    if not pulled_back.empty:
+        print("Pulled-back features:")
+        for _, row in pulled_back.iterrows():
+            outcome_text = row["business_outcome"].lower()
+            print(f"  - {row['feature_name']} ({row['company']}) [{outcome_text}]")
+            print(f"    {row['evidence_summary']}")
         print()
-    
-    # Show unknowns
-    if unknown_count > 0:
-        print(f"Unknown ({unknown_count} features need research):")
-        unknowns = df[df['known_outcome'] == 'UNKNOWN'][['feature_name', 'company']]
+
+    ambiguous_context = df[has_context & (df["company_action"] == "UNKNOWN")][
+        ["feature_name", "company", "evidence_summary"]
+    ]
+    if not ambiguous_context.empty:
+        print("Context exists but the action is still ambiguous:")
+        for _, row in ambiguous_context.iterrows():
+            print(f"  ? {row['feature_name']} ({row['company']})")
+            print(f"    {row['evidence_summary']}")
+        print()
+
+    if no_context_count > 0:
+        print("No public context yet:")
+        unknowns = df[~has_context][["feature_name", "company"]]
         for _, row in unknowns.iterrows():
             print(f"  ? {row['feature_name']} ({row['company']})")
-    
+
     return df
 
 
-if __name__ == "__main__":
-    print("Applying known business outcomes to labeled features...\n")
-    df = apply_outcomes_to_csv()
-    
+def main() -> None:
+    """Run the decision-context application script from the command line."""
+    print("Applying public decision context to labeled features...\n")
+    apply_outcomes_to_csv()
+
     print("\nNext steps:")
     print("  1. python src/analysis/statistical_analysis.py")
     print("  2. python scripts/generate_visualizations.py\n")
+
+
+if __name__ == "__main__":
+    main()

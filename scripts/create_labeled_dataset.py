@@ -1,11 +1,9 @@
 """
-Merge feature inventory with Reddit validation results to create labeled dataset.
+Merge feature inventory with Reddit validation results to create the base analysis dataset.
 
-Maps Reddit classification to coarse outcome labels:
-- ADOPTION / SUSTAINED_INTEREST → success
-- ABANDONMENT / LOW_AWARENESS → failure
-- NO_DECAY_DATA → no_decay_data
-- Everything else → inconclusive
+The labels created here describe what the *public signals* suggest. They are not
+business outcomes and they are not company decisions. The later
+``scripts/apply_outcomes.py`` step adds that separate decision context.
 
 Usage: python scripts/create_labeled_dataset.py
 """
@@ -14,18 +12,18 @@ from pathlib import Path
 import pandas as pd
 
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 VALIDATION_DIR = DATA_DIR / "validation"
 
 
-def map_outcome(classification: str) -> str:
-    """Map Reddit classification to coarse outcome label."""
+def map_signal_label(classification: str) -> str:
+    """Map Reddit classification to a coarse public-signal interpretation."""
     if classification in ("ADOPTION", "SUSTAINED_INTEREST"):
-        return "success"
+        return "supportive"
     if classification in ("ABANDONMENT", "LOW_AWARENESS"):
-        return "failure"
+        return "caution"
     if classification == "NO_DECAY_DATA":
         return "no_decay_data"
     return "inconclusive"
@@ -48,17 +46,20 @@ def main() -> None:
         validate="one_to_one"
     )
 
-    # Derive outcome labels
-    df["outcome_label"] = df["classification"].map(map_outcome)
-    df["is_success"] = df["outcome_label"].eq("success").astype("Int64")
-    df["is_failure"] = df["outcome_label"].eq("failure").astype("Int64")
+    # Derive public-signal labels. These are not business outcomes.
+    df["signal_label"] = df["classification"].map(map_signal_label)
+    df["signal_binary"] = (
+        df["signal_label"]
+        .map({"supportive": 1, "caution": 0})
+        .astype("Int64")
+    )
 
     out_path = VALIDATION_DIR / "labeled_features.csv"
     df.to_csv(out_path, index=False)
 
     print(f"✓ Saved labeled dataset: {out_path}")
-    print("\nOutcome label counts:")
-    print(df["outcome_label"].value_counts(dropna=False))
+    print("\nPublic-signal label counts:")
+    print(df["signal_label"].value_counts(dropna=False))
 
 
 if __name__ == "__main__":
