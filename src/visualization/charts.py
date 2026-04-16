@@ -68,23 +68,66 @@ def _svg_y_ticks(max_value: float, intervals: int = 4) -> list[float]:
     return [step * idx for idx in range(intervals + 1)]
 
 
+def _svg_text_block(
+    x: float,
+    y: float,
+    lines: list[str],
+    *,
+    font_size: int = 14,
+    font_weight: str = "400",
+    fill: str = "#24292F",
+    anchor: str = "start",
+    line_height: float = 1.25,
+) -> str:
+    """Render a multi-line SVG text block with consistent line spacing."""
+    parts = [
+        (
+            f'<text x="{x:.1f}" y="{y:.1f}" text-anchor="{anchor}" '
+            f'font-family="Arial, Helvetica, sans-serif" font-size="{font_size}" '
+            f'font-weight="{font_weight}" fill="{fill}">'
+        )
+    ]
+    for index, line in enumerate(lines):
+        dy = 0 if index == 0 else font_size * line_height
+        parts.append(f'<tspan x="{x:.1f}" dy="{dy:.1f}">{escape(line)}</tspan>')
+    parts.append("</text>")
+    return "".join(parts)
+
+
+def _stacked_band_y_positions(values: pd.Series, center_y: float) -> list[float]:
+    """Place points in tidy vertical stacks so dense regions stay legible in static SVGs."""
+    offsets = [-27, -13, 0, 13, 27, -40, 40]
+    seen_per_bucket: dict[float, int] = {}
+    positions: list[float] = []
+
+    for value in values:
+        bucket = round(float(value) / 0.01) * 0.01
+        seen = seen_per_bucket.get(bucket, 0)
+        seen_per_bucket[bucket] = seen + 1
+        base_offset = offsets[seen % len(offsets)]
+        tier_offset = (seen // len(offsets)) * 10
+        direction = -1 if seen % 2 == 0 else 1
+        positions.append(center_y + base_offset + direction * tier_offset)
+
+    return positions
+
+
 def create_decay_vs_action_preview_svg(
     df: pd.DataFrame,
     output_path: str = "documentation/assets/decay_vs_action_preview.svg",
 ) -> None:
-    """Create a GitHub-friendly static SVG preview of the main scatter chart."""
+    """Create a readable GitHub-first SVG preview of the main action-overlap pattern."""
     plot_df = df[df["search_decay"].notna() & df["total_mentions"].notna()].copy()
     if plot_df.empty:
         raise ValueError("Cannot build preview without search_decay and total_mentions data.")
 
-    plot_df["engagement_score"] = plot_df.get("engagement_score", plot_df["total_mentions"].fillna(0) * 10)
-
-    width, height = 1180, 760
-    left, right, top, bottom = 105, 1040, 125, 650
+    labeled_actions = ["SUPPORTED", "PULLED_BACK", "UNKNOWN"]
+    width, height = 1180, 820
+    left, right, top, bottom = 150, 1038, 160, 560
     chart_width = right - left
     chart_height = bottom - top
-    y_max = max(float(plot_df["total_mentions"].max()), 1.0)
-    ticks = _svg_y_ticks(y_max)
+    x_domain_min = min(0.45, max(0.0, math.floor(float(plot_df["search_decay"].min()) * 10) / 10))
+    x_domain_max = 1.0
 
     supported = plot_df[plot_df["company_action"] == "SUPPORTED"]
     supported_high_decay = int((supported["search_decay"] > HIGH_DECAY_ACTION_THRESHOLD).sum())
@@ -93,23 +136,37 @@ def create_decay_vs_action_preview_svg(
     svg_parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         f'<rect width="{width}" height="{height}" fill="#FAFBFC"/>',
-        '<rect x="36" y="34" width="1108" height="692" rx="22" fill="white" stroke="#D0D7DE"/>',
-        f'<text x="{left}" y="72" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="{CHART_THEME["primary"]}">Public Signals vs Observable Company Action</text>',
-        '<text x="105" y="102" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#57606A">High search decay is common even among supported features. Public attention fades faster than product value gets resolved.</text>',
+        '<rect x="36" y="34" width="1108" height="752" rx="22" fill="white" stroke="#D0D7DE"/>',
+        _svg_text_block(
+            left,
+            68,
+            [
+                "High Search Decay Appears Across",
+                "Supported and Pulled-Back Features",
+            ],
+            font_size=24,
+            font_weight="700",
+            fill=CHART_THEME["primary"],
+        ),
+        _svg_text_block(
+            left,
+            118,
+            [
+                "This GitHub preview simplifies the interactive bubble chart so the overlap is readable.",
+                "The pattern still holds: high decay is common even when product support continues.",
+            ],
+            font_size=13,
+            fill="#57606A",
+        ),
     ]
 
-    for tick in ticks:
-        y = _scale_linear(tick, 0, y_max, bottom, top)
-        tick_label = f"{tick:.0f}"
-        svg_parts.extend(
-            [
-                f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="#EAECEF" stroke-width="1"/>',
-                f'<text x="{left - 16}" y="{y + 5:.1f}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">{tick_label}</text>',
-            ]
-        )
+    high_decay_x = _scale_linear(HIGH_DECAY_ACTION_THRESHOLD, x_domain_min, x_domain_max, left, right)
+    svg_parts.append(
+        f'<rect x="{high_decay_x:.1f}" y="{top}" width="{right - high_decay_x:.1f}" height="{chart_height}" fill="#F6FFFA"/>'
+    )
 
-    for tick in [0.0, 0.25, 0.50, 0.75, 1.0]:
-        x = _scale_linear(tick, 0, 1, left, right)
+    for tick in [0.50, 0.60, 0.70, 0.80, 0.90, 1.0]:
+        x = _scale_linear(tick, x_domain_min, x_domain_max, left, right)
         svg_parts.extend(
             [
                 f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{bottom}" stroke="#F3F4F6" stroke-width="1"/>',
@@ -117,76 +174,86 @@ def create_decay_vs_action_preview_svg(
             ]
         )
 
-    svg_parts.extend(
-        [
-            f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="#24292F" stroke-width="2"/>',
-            f'<line x1="{left}" y1="{top}" x2="{left}" y2="{bottom}" stroke="#24292F" stroke-width="2"/>',
-            f'<text x="{(left + right) / 2:.1f}" y="{bottom + 58}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#24292F">Search Decay (4 weeks post-peak)</text>',
-            f'<text x="32" y="{(top + bottom) / 2:.1f}" text-anchor="middle" transform="rotate(-90 32 {(top + bottom) / 2:.1f})" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#24292F">Reddit Mentions</text>',
-        ]
-    )
-
-    for _, row in plot_df.iterrows():
-        x = _scale_linear(float(row["search_decay"]), 0, 1, left, right)
-        y = _scale_linear(float(row["total_mentions"]), 0, y_max, bottom, top)
-        radius = _svg_circle_radius(float(row["engagement_score"]))
-        color = ACTION_COLORS.get(row.get("company_action", "UNKNOWN"), ACTION_COLORS["UNKNOWN"])
-        svg_parts.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius:.1f}" fill="{color}" fill-opacity="0.72" stroke="white" stroke-width="2"/>'
-        )
-
-    callout_offsets = {
-        "Password Sharing Crackdown": (18, -22),
-        "AI DJ": (-110, -24),
-        "GroupWatch": (-126, -10),
-        "Watch Party": (18, 24),
-    }
-    for feature_name, (dx, dy) in callout_offsets.items():
-        match = plot_df[plot_df["feature_name"] == feature_name]
-        if match.empty:
-            continue
-        row = match.iloc[0]
-        x = _scale_linear(float(row["search_decay"]), 0, 1, left, right)
-        y = _scale_linear(float(row["total_mentions"]), 0, y_max, bottom, top)
-        label_x = x + dx
-        label_y = y + dy
-        anchor = "start" if dx >= 0 else "end"
+    band_height = chart_height / len(labeled_actions)
+    band_centers: dict[str, float] = {}
+    for index, action in enumerate(labeled_actions):
+        y = top + index * band_height
+        center_y = y + band_height / 2
+        band_centers[action] = center_y
+        fill = "#FFFFFF" if index % 2 == 0 else "#FBFCFD"
         svg_parts.extend(
             [
-                f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{label_x:.1f}" y2="{label_y - 4:.1f}" stroke="#57606A" stroke-width="1.5"/>',
-                f'<text x="{label_x:.1f}" y="{label_y:.1f}" text-anchor="{anchor}" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#24292F">{escape(feature_name)}</text>',
+                f'<rect x="{left}" y="{y:.1f}" width="{chart_width}" height="{band_height:.1f}" fill="{fill}"/>',
+                f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="#EAECEF" stroke-width="1"/>',
+                f'<text x="{left - 18}" y="{center_y + 5:.1f}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">{action.replace("_", " ").title()}</text>',
+            ]
+        )
+        count = int((plot_df["company_action"] == action).sum())
+        pill_width = 112 if action != "PULLED_BACK" else 118
+        pill_x = left + 12
+        pill_y = center_y - 18
+        svg_parts.extend(
+            [
+                f'<rect x="{pill_x}" y="{pill_y:.1f}" width="{pill_width}" height="36" rx="18" fill="#FFFFFF" stroke="#D0D7DE"/>',
+                f'<circle cx="{pill_x + 18}" cy="{center_y:.1f}" r="7" fill="{ACTION_COLORS[action]}"/>',
+                f'<text x="{pill_x + 34}" y="{center_y + 5:.1f}" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#24292F">n = {count}</text>',
             ]
         )
 
-    legend_x = 818
-    legend_y = 136
     svg_parts.append(
-        '<rect x="800" y="118" width="290" height="86" rx="16" fill="#FFFFFF" stroke="#D0D7DE"/>'
+        f'<line x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}" stroke="#24292F" stroke-width="2"/>'
     )
-    for index, label in enumerate(["SUPPORTED", "PULLED_BACK", "UNKNOWN"]):
-        y = legend_y + index * 23
-        svg_parts.extend(
-            [
-                f'<circle cx="{legend_x}" cy="{y}" r="7" fill="{ACTION_COLORS[label]}"/>',
-                f'<text x="{legend_x + 18}" y="{y + 4}" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#24292F">{label.replace("_", " ").title()}</text>',
-            ]
-        )
-
-    annotation_x = 810
-    annotation_y = 505
     svg_parts.extend(
         [
-            f'<rect x="{annotation_x}" y="{annotation_y}" width="250" height="102" rx="18" fill="#F6FFFA" stroke="{ACTION_COLORS["SUPPORTED"]}" stroke-width="2"/>',
-            f'<text x="{annotation_x + 18}" y="{annotation_y + 30}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="{ACTION_COLORS["SUPPORTED"]}">{supported_pct:.0f}% of supported features</text>',
-            f'<text x="{annotation_x + 18}" y="{annotation_y + 54}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="{ACTION_COLORS["SUPPORTED"]}">show more than {HIGH_DECAY_ACTION_THRESHOLD:.0%} decay</text>',
-            '<text x="828" y="585" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">High decay is a warning signal.</text>',
-            '<text x="828" y="605" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">It is not a product verdict.</text>',
+            f'<text x="{(left + right) / 2:.1f}" y="{bottom + 62}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#24292F">Search Decay (4 weeks post-peak, zoomed to observed range)</text>',
+            f'<line x1="{high_decay_x:.1f}" y1="{top}" x2="{high_decay_x:.1f}" y2="{bottom}" stroke="{ACTION_COLORS["SUPPORTED"]}" stroke-width="2" stroke-dasharray="6 6"/>',
+            f'<text x="{high_decay_x - 10:.1f}" y="{top + 22}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="{ACTION_COLORS["SUPPORTED"]}">High-decay region (&gt; {HIGH_DECAY_ACTION_THRESHOLD:.0%})</text>',
+        ]
+    )
+
+    for action in labeled_actions:
+        group = plot_df[plot_df["company_action"] == action].sort_values("search_decay")
+        y_positions = _stacked_band_y_positions(group["search_decay"], band_centers[action])
+        for (_, row), y in zip(group.iterrows(), y_positions):
+            x = _scale_linear(float(row["search_decay"]), x_domain_min, x_domain_max, left, right)
+            radius = 9 if action != "UNKNOWN" else 8
+            opacity = 0.88 if action != "UNKNOWN" else 0.65
+            svg_parts.append(
+                f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius:.1f}" fill="{ACTION_COLORS[action]}" fill-opacity="{opacity:.2f}" stroke="white" stroke-width="2"/>'
+            )
+
+    annotation_x = 730
+    annotation_y = 644
+    svg_parts.extend(
+        [
+            f'<rect x="{annotation_x}" y="{annotation_y}" width="250" height="86" rx="18" fill="#F6FFFA" stroke="{ACTION_COLORS["SUPPORTED"]}" stroke-width="2"/>',
+            _svg_text_block(
+                annotation_x + 18,
+                annotation_y + 22,
+                [
+                    f"{supported_pct:.0f}% of supported features",
+                    f"still sit above {HIGH_DECAY_ACTION_THRESHOLD:.0%} decay.",
+                ],
+                font_size=14,
+                font_weight="700",
+                fill=ACTION_COLORS["SUPPORTED"],
+            ),
+            _svg_text_block(
+                annotation_x + 18,
+                annotation_y + 54,
+                [
+                    "High decay is a warning sign,",
+                    "not a product verdict.",
+                ],
+                font_size=12,
+                fill="#57606A",
+            ),
         ]
     )
 
     svg_parts.extend(
         [
-            '<text x="105" y="700" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606A">Static preview for GitHub. Run scripts/generate_visualizations.py for the interactive HTML charts.</text>',
+            '<text x="150" y="770" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#57606A">Static preview for GitHub. The interactive HTML adds Reddit mentions and richer hover detail.</text>',
             '</svg>',
         ]
     )
@@ -198,11 +265,15 @@ def create_decision_matrix_preview_svg(
     output_path: str = "documentation/assets/decision_matrix_preview.svg",
 ) -> None:
     """Create a static SVG version of the decision matrix for GitHub docs."""
-    width, height = 1120, 720
-    cell_width = 255
-    cell_height = 118
-    start_x = 215
-    start_y = 180
+    width, height = 1120, 760
+    cell_width = 224
+    cell_height = 104
+    col_gap = 18
+    row_gap = 18
+    start_x = 228
+    start_y = 184
+    matrix_width = cell_width * 3 + col_gap * 2
+    matrix_height = cell_height * 3 + row_gap * 2
     decay_levels = [
         f"Low (<{DECAY_STICKY_THRESHOLD:.0%})",
         f"Medium ({DECAY_STICKY_THRESHOLD:.0%}-{HIGH_DECAY_ACTION_THRESHOLD:.0%})",
@@ -210,53 +281,119 @@ def create_decision_matrix_preview_svg(
     ]
     sentiments = ["Negative", "Mixed", "Positive"]
     recommendations = [
-        [("INVESTIGATE", "#FFE7E5"), ("CHECK INTERNALS", "#FFF2CC"), ("DON'T AUTO-ROLLBACK", "#E8F5E9")],
-        [("NEEDS CONTEXT", "#FFF2CC"), ("NEEDS CONTEXT", "#FFF2CC"), ("NEEDS CONTEXT", "#FFF2CC")],
-        [("TRACK ADOPTION", "#E8F5E9"), ("DON'T AUTO-PANIC", "#E8F5E9"), ("DON'T AUTO-PANIC", "#E8F5E9")],
+        [(["INVESTIGATE"], "#FFE7E5"), (["CHECK", "INTERNALS"], "#FFF2CC"), (["DON'T", "AUTO-ROLLBACK"], "#E8F5E9")],
+        [(["NEEDS", "CONTEXT"], "#FFF2CC"), (["NEEDS", "CONTEXT"], "#FFF2CC"), (["NEEDS", "CONTEXT"], "#FFF2CC")],
+        [(["TRACK", "ADOPTION"], "#E8F5E9"), (["DON'T", "AUTO-PANIC"], "#E8F5E9"), (["DON'T", "AUTO-PANIC"], "#E8F5E9")],
     ]
 
     svg_parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         f'<rect width="{width}" height="{height}" fill="#FAFBFC"/>',
-        '<rect x="32" y="28" width="1056" height="664" rx="22" fill="white" stroke="#D0D7DE"/>',
-        f'<text x="{start_x}" y="82" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="{CHART_THEME["primary"]}">Decision Matrix: Public Signals Need Internal Context</text>',
-        '<text x="215" y="112" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#57606A">Use public signals to decide what to investigate next, not what to kill.</text>',
+        '<rect x="32" y="28" width="1056" height="704" rx="22" fill="white" stroke="#D0D7DE"/>',
+        _svg_text_block(
+            start_x,
+            66,
+            [
+                "Decision Matrix:",
+                "Public Signals Need Internal Context",
+            ],
+            font_size=24,
+            font_weight="700",
+            fill=CHART_THEME["primary"],
+        ),
+        _svg_text_block(
+            start_x,
+            114,
+            ["Use public signals to decide what to investigate next, not what to kill."],
+            font_size=13,
+            fill="#57606A",
+        ),
     ]
 
     for index, level in enumerate(decay_levels):
-        x = start_x + index * cell_width + cell_width / 2
+        x = start_x + index * (cell_width + col_gap) + cell_width / 2
         svg_parts.append(
-            f'<text x="{x:.1f}" y="{start_y - 20}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">{escape(level)}</text>'
+            f'<text x="{x:.1f}" y="{start_y - 18}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">{escape(level)}</text>'
         )
 
+    svg_parts.append(
+        _svg_text_block(
+            start_x - 110,
+            start_y - 4,
+            ["Reddit", "sentiment"],
+            font_size=15,
+            font_weight="700",
+            fill="#24292F",
+            anchor="middle",
+        )
+    )
+
     for index, sentiment in enumerate(sentiments):
-        y = start_y + index * cell_height + cell_height / 2
+        y = start_y + index * (cell_height + row_gap) + cell_height / 2
         svg_parts.append(
             f'<text x="{start_x - 22}" y="{y + 4:.1f}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">{escape(sentiment)}</text>'
         )
 
     for row_index, row in enumerate(recommendations):
-        for col_index, (label, fill_color) in enumerate(row):
-            x = start_x + col_index * cell_width
-            y = start_y + row_index * cell_height
+        for col_index, (label_lines, fill_color) in enumerate(row):
+            x = start_x + col_index * (cell_width + col_gap)
+            y = start_y + row_index * (cell_height + row_gap)
             svg_parts.extend(
                 [
-                    f'<rect x="{x}" y="{y}" width="{cell_width - 10}" height="{cell_height - 10}" rx="18" fill="{fill_color}" stroke="#D0D7DE"/>',
-                    f'<text x="{x + (cell_width - 10) / 2:.1f}" y="{y + 54}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#24292F">{escape(label)}</text>',
+                    f'<rect x="{x}" y="{y}" width="{cell_width}" height="{cell_height}" rx="18" fill="{fill_color}" stroke="#D0D7DE"/>',
+                    _svg_text_block(
+                        x + cell_width / 2,
+                        y + 42,
+                        label_lines,
+                        font_size=17,
+                        font_weight="700",
+                        anchor="middle",
+                    ),
                 ]
             )
 
-    notes_y = 568
+    footer_y = start_y + matrix_height + 68
+    rule_box_width = 292
+    rule_box_height = 92
+    rule_box_x = start_x + matrix_width - rule_box_width
+    rule_box_y = footer_y - 22
     svg_parts.extend(
         [
-            '<text x="96" y="204" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">Reddit Sentiment</text>',
-            '<text x="215" y="624" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#24292F">Before rollback, require:</text>',
-            '<text x="215" y="652" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#57606A">adoption • repeat usage • retention effect • monetization where relevant • cost to maintain</text>',
-            f'<rect x="772" y="{notes_y}" width="242" height="74" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>',
-            '<text x="792" y="596" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#24292F">Rule of thumb</text>',
-            '<text x="792" y="621" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">External concern without internal</text>',
-            '<text x="792" y="642" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">evidence should trigger investigation,</text>',
-            '<text x="792" y="663" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#57606A">not an automatic rollback.</text>',
+            _svg_text_block(
+                start_x,
+                footer_y,
+                ["Before rollback, require:"],
+                font_size=15,
+                font_weight="700",
+            ),
+            _svg_text_block(
+                start_x,
+                footer_y + 28,
+                [
+                    "adoption • repeat usage • retention effect",
+                    "monetization where relevant • cost to maintain",
+                ],
+                font_size=14,
+                fill="#57606A",
+            ),
+            f'<rect x="{rule_box_x}" y="{rule_box_y}" width="{rule_box_width}" height="{rule_box_height}" rx="16" fill="#F6F8FA" stroke="#D0D7DE"/>',
+            _svg_text_block(
+                rule_box_x + 20,
+                rule_box_y + 28,
+                ["Rule of thumb"],
+                font_size=14,
+                font_weight="700",
+            ),
+            _svg_text_block(
+                rule_box_x + 20,
+                rule_box_y + 54,
+                [
+                    "External concern without internal evidence",
+                    "should trigger investigation, not rollback.",
+                ],
+                font_size=13,
+                fill="#57606A",
+            ),
             '</svg>',
         ]
     )

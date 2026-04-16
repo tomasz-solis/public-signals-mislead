@@ -122,7 +122,7 @@ Same broad public-signal pattern. Different product path. That is the repo's cen
 
 ## What You See On GitHub
 
-The interactive charts are generated locally, but the repo includes two static previews so the main idea is visible immediately on GitHub.
+The interactive charts are generated locally, but the repo includes two static previews so the main idea is visible immediately on GitHub. The first preview deliberately simplifies the full bubble chart so the overlap is readable in a static README.
 
 ### Main Signal View
 
