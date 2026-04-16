@@ -1,14 +1,43 @@
-legacy/
-venv/
-__pycache__/
-.ipynb_checkpoints/.env
-.env
-.DS_Store
+# Generated outputs - rebuild with scripts/generate_visualizations.py
+results/figures/*.html
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+
+# Data collection credentials
+*.json.key
+
+# Project-specific generated data
 data/raw/batches/
 data/trends/backup/
 data/trends/longterm/
 data/trends/full_decay_metrics_batch_*.csv
 data/trends/full_trends_data_batch_*.csv
 
+# IDE and editors
+.vscode/settings.json
+.idea/
+*.swp
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local notes
+legacy/
 PERSONAL_LEARNINGS.md
