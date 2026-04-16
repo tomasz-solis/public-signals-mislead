@@ -1,236 +1,204 @@
 # How to Run This Analysis
 
 **Time:** 5-10 minutes  
-**Difficulty:** Easy (if you have Python)
+**Difficulty:** Easy
 
-## Setup (One-Time, 2 minutes)
+If your machine exposes `python3` instead of `python`, substitute that in the commands below.
+
+## Setup
 
 ### 1. Clone or Download
 
 ```bash
-# Option A: Clone with git
 git clone https://github.com/yourusername/public-signals-mislead.git
 cd public-signals-mislead
-
-# Option B: Download ZIP and extract
-# Navigate to folder in terminal
 ```
 
-### 2. Install Packages
+### 2. Install the Project
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -e .
 ```
 
-Wait time: 30 seconds - 2 minutes
+Optional, if you want to run tests too:
 
-### 3. Verify Data Files
+```bash
+python -m pip install -e '.[dev]'
+```
+
+### 2.5 Environment Setup (Optional)
+
+This is only needed if you want to re-collect Reddit data.
+
+```bash
+cp .env.example .env
+```
+
+Fill in the Reddit API credentials in `.env`. The analysis itself runs fine without this because the collected data is already in the repo.
+
+### 3. Verify the Data Files
 
 ```bash
 ls data/validation/labeled_features.csv
 ls data/trends/
 ```
 
-Should see `labeled_features.csv` and several CSV files in `data/trends/`.
+## Run the Analysis
 
-If missing, you didn't clone everything - the data is in the repo.
-
-## Run the Analysis (5 minutes)
-
-### Step 1: Apply Business Outcomes
-
-What this does: Labels 20 features with verified outcomes from earnings calls.
+### Step 1: Apply Decision Context
 
 ```bash
 python scripts/apply_outcomes.py
 ```
 
-Wait time: Instant
+Expected summary:
 
-Expected output:
+```text
+Supported: 16
+Pulled back: 3
+Unknown action: 17
+
+Known business outcome coverage:
+  Positive: 7
+  Negative: 2
+  Unknown: 27
 ```
-✓ 16 successes (Tier 1: 7, Tier 2: 9)
-✗ 4 failures
-? 16 unknown (need research)
+
+This step adds two fields that the rest of the repo depends on:
+
+- `company_action`: what the public record suggests the company did
+- `business_outcome`: what the public record can actually prove about value
+
+Those fields are intentionally separate. Removal is observable. True value often is not.
+
+### Step 2: Run the Test Suite
+
+```bash
+python -m pytest tests -v
 ```
 
-### Step 2: Run Statistical Tests
+Expected result:
 
-What this does: Tests if search decay predicts success. Spoiler: it doesn't.
+```text
+============================== 7 passed in ...
+```
+
+### Step 3: Run the Statistical Analysis
 
 ```bash
 python src/analysis/statistical_analysis.py
 ```
 
-Wait time: Instant
+What to look for:
 
-Expected output:
+- `Search Decay - Supported vs Pulled Back` uses Mann-Whitney U as the primary test
+- the Bonferroni threshold is shown explicitly
+- the power analysis explains that the study can only detect very large effects
+- the sensitivity section shows how the high-decay share changes from 50% to 95%
+- the framework validation compares the decision rules against a majority-class baseline
+- the signal ablation table shows whether combined signals outperform single-signal rules
+- the observability note explains that `company_action` is more visible than true value
+
+Current headline output:
+
+```text
+Sample sizes: 16 supported, 3 pulled back, 36 total
+Bonferroni threshold for 3 tests: p < 0.017
+...
+KEY FINDING: 11 supported features above 80% decay (69%)
 ```
-STATISTICAL ANALYSIS: Search Decay vs Success
-✓ 16 successes, ✗ 4 failures
 
-TEST 1: Search Decay - Success vs Failure
-  Successes:  83.7% (±16.4%)
-  Failures:   88.2% (±13.7%)
-  p-value: 0.5943
-  ✓ No significant difference
+The script also updates `data/validation/statistical_results.csv`.
 
-KEY FINDING: 11 successes with >80% decay (69%)
-```
+If you want the repo walkthrough instead of just the commands, start with:
 
-Saved to: `data/validation/statistical_results.csv`
+- `README.md`
+- `documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md`
+- `documentation/ARCHITECTURE.md`
 
-### Step 3: Generate Charts
-
-What this does: Creates 5 interactive HTML visualizations.
+### Step 4: Generate the Charts
 
 ```bash
 python scripts/generate_visualizations.py
 ```
 
-Wait time: 2-3 seconds
+Expected result:
 
-Expected output:
-```
-GENERATING VISUALIZATIONS
-
-1️⃣ Creating decay vs outcome scatter...
-   ✓ Saved: results/figures/decay_vs_outcome.html
-2️⃣ Creating divergence comparison...
-   ✓ Saved: results/figures/divergence_examples.html
-...
+```text
+✓ VISUALIZATIONS COMPLETE
 ```
 
-### Step 4: View Results
+The HTML files are written to `results/figures/`.
 
-Open charts in browser:
+### Step 5: Open a Chart
 
 ```bash
-# Mac
-open results/figures/decay_vs_outcome.html
-
-# Windows
-start results/figures/decay_vs_outcome.html
-
-# Linux
-xdg-open results/figures/decay_vs_outcome.html
+open results/figures/decay_vs_action.html
 ```
 
-All 5 charts:
-1. `decay_vs_outcome.html` - Main finding
-2. `divergence_examples.html` - Netflix vs Disney+
-3. `decision_matrix.html` - Interpretation guide
-4. `success_by_type.html` - Category analysis
-5. `statistical_comparison.html` - Metrics comparison
+Use `start` on Windows or `xdg-open` on Linux.
 
-Charts are interactive - click, zoom, hover.
-
-## One-Command Script (Optional)
-
-Run everything at once:
+## One-Command Option
 
 ```bash
-chmod +x run_analysis.sh
 ./run_analysis.sh
 ```
 
-Total time: 5 seconds
+That script now detects `python` vs `python3` automatically and installs the local package in editable mode when needed.
 
 ## Troubleshooting
 
-### Error: ModuleNotFoundError
+### `python: command not found`
+
+Use `python3` instead.
+
+### `ModuleNotFoundError`
+
+Reinstall the local package:
 
 ```bash
-pip install pandas scipy plotly
+python -m pip install -e .
 ```
 
-### Error: FileNotFoundError
+### `pytest` is missing
 
-You're in the wrong directory. Navigate to project root:
+Install the dev extra:
 
 ```bash
-cd /path/to/public-signals-mislead
+python -m pip install -e '.[dev]'
 ```
 
-### Error: ImportError: No module named 'config'
+### Charts are missing after clone
 
-Run from project root, not from inside subdirectories:
+They are generated artifacts now, not tracked files. Rebuild them with:
 
 ```bash
-# Wrong
-cd src/analysis
-python statistical_analysis.py
-
-# Right
-cd /path/to/public-signals-mislead
-python src/analysis/statistical_analysis.py
+python scripts/generate_visualizations.py
 ```
 
-### Charts won't open
+### Why does the repo keep `business_outcome = UNKNOWN` so often?
 
-Open manually:
-- Navigate to `results/figures/` in file browser
-- Double-click any `.html` file
-- Opens in default browser
+That is by design. The repo is framed around product-decision risk, not full business-outcome prediction. Public sources often reveal whether a feature was kept or pulled back, but they usually do not reveal the real value of the feature.
 
-## Data Collection (Optional - Already Done)
+## Optional Recollection
 
-You don't need to collect data - it's in the repo.
+You do not need this for the portfolio version, but the pipeline is still there.
 
-But if you want to re-collect:
-
-### Google Trends (Time-Intensive)
+### Google Trends
 
 ```bash
-# Create batches
 python src/data_collection/create_batches.py
-
-# Collect batch 1
-python src/data_collection/collect_trends_data.py --input data/raw/batches/batch_1_of_5.csv
-
-# Wait 30-60 minutes (rate limit cooldown)
-
-# Collect batch 2
-python src/data_collection/collect_trends_data.py --input data/raw/batches/batch_2_of_5.csv
-
-# Wait 30-60 minutes
-
-# Repeat for batches 3-5
-
-# Merge all batches
+python src/data_collection/collect_trends_data.py --full --input data/raw/batches/batch_1_of_5.csv
 python src/data_collection/merge_batches.py
+python src/data_collection/recalculate_with_peaks.py --input data/trends/MERGED_trends_data.csv
 ```
 
-Total time: ~4 hours (mostly waiting)
+Collection runs now write structured logs to `data/collection.log`.
 
-Why so slow? Google Trends limits: ~10 features per hour max.
-
-### Reddit Collection (Also Time-Intensive)
+### Reddit Validation
 
 ```bash
-# Collect Netflix features
 python src/data_collection/reddit/validate_features.py --companies "Netflix"
-
-# Wait 10-15 minutes (rate limits)
-
-# Collect Spotify
-python src/data_collection/reddit/validate_features.py --companies "Spotify"
-
-# Repeat for other companies
 ```
 
-Total time: 1-2 hours
-
-Why so slow? Reddit API limits: 60 req/min with auth, 30 req/min without.
-
-### Business Verification (Manual)
-
-Most time-consuming:
-- Read earnings call transcripts
-- Check press releases
-- Find credible reports
-- Verify metrics
-
-Time: Several days (already done for you)
-
-**Bottom line:** Use the provided data. Focus on analysis.
+Bottom line: for normal use, skip recollection and work from the provided data.

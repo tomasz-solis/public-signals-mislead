@@ -1,183 +1,268 @@
-# When Search Trends Lie About Product Success
+# Public Signals Mislead
 
-**TL;DR:** Analyzed 36 subscription features. Found 69% of successes show massive search decay - same pattern as failures. External signals mislead without context.
+**Thesis:** public signals mislead product teams when used without internal context.
 
-## The Problem
+This repo studies a narrow but practical problem: search trends, Reddit chatter, and launch buzz often look more decisive than they really are. A feature can lose public attention fast, attract noisy complaints, or even get rolled back later, and none of that cleanly tells us what the feature was worth to the business or to a specific user segment.
 
-You launch a feature. Google Trends shows huge initial interest, then drops 90% in a month. Is your feature failing?
+The point is not "Google Trends predicts business success." It does not. The point is that public signals are weak standalone inputs for product decisions, especially when the internal metrics that matter most are invisible from the outside.
 
-**Maybe. Or maybe it's working perfectly.**
+The repo is written as a decision-support case study, not a model demo. The work is organized around three questions:
 
-Netflix Password Sharing:
-- 93% search decay
-- Added 9.3 million subscribers
+- what can we actually observe from the outside
+- what remains unknown without internal product data
+- where teams are most likely to overread noisy public signals
 
-Disney+ GroupWatch:
-- 88% search decay
-- Discontinued for low usage
+## The Product Question
 
-Same signal. Opposite outcomes. Search patterns alone tell you nothing.
+A feature launches. Search interest drops a month later. Reddit gets loud. The tempting story is:
+
+- decay means the feature is fading
+- backlash means the feature is failing
+- rollback is the safe move
+
+This repo pushes back on that shortcut.
+
+What the public record usually can show:
+
+- search decay
+- Reddit mention volume
+- Reddit sentiment
+- whether the company appears to keep backing the feature or pull back from it
+
+What the public record usually cannot show:
+
+- retention lift
+- revenue contribution
+- value to a niche but important audience
+- internal strategy tradeoffs
+- the counterfactual of what would have happened if the team made a different choice
+
+That gap matters. Removal is observable. True value often is not.
 
 ## Main Finding
 
-Tested 20 features with verified business outcomes from earnings calls:
+I analyzed 36 subscription features. Public decision context exists for 20 of them, and 19 have a usable `company_action` label for a simple supported-vs-pulled-back comparison.
 
-**Statistical Result:**
-- Successes: 83.7% average decay
-- Failures: 88.2% average decay
-- p-value: 0.59 (not significant)
-- Effect size: Negligible (Cohen's d = -0.30)
+Headline result:
 
-**Translation:** Search decay alone cannot predict feature success.
+- Supported features average `83.7%` search decay
+- Pulled-back features average `92.1%` search decay
+- Primary p-value is `0.284` with Mann-Whitney U
+- `69%` of supported features still show more than `80%` decay
 
-**But:** Combining search decay + Reddit sentiment + engagement reveals patterns:
-- High decay + positive sentiment + lots of mentions = Adoption (users learned it)
-- High decay + negative sentiment = Abandonment (users gave up)
-- Low decay + positive sentiment = Sustained interest (rare)
+The strongest interpretation is not "decay means nothing." It is narrower:
 
-## Why This Matters
+- heavy decay is common even when a company keeps backing the feature
+- public attention resolves much faster than product value does
+- a decaying trend line is not a product verdict
 
-**For Product Teams:** Don't panic when trends drop. Don't cancel features based on declining buzz.
+## What The Labels Mean
 
-**For Data Teams:** Multi-signal validation beats single metrics. Context matters.
+The repo now separates two ideas that should not be mixed.
 
-**For Hiring Managers:** This demonstrates decision science thinking, not just running tests.
+- `company_action`
+  - `SUPPORTED`: the public record suggests the company kept, expanded, or kept backing the feature
+  - `PULLED_BACK`: the public record suggests the company removed it, undercut it, or clearly stopped backing it
+  - `UNKNOWN`: the public story is too thin to classify honestly
+- `business_outcome`
+  - `POSITIVE` / `NEGATIVE` only when the public record includes real business evidence
+  - `UNKNOWN` otherwise
+
+This is the core design choice in the repo. `company_action` is often visible from outside. `business_outcome` usually is not.
+
+Examples:
+
+- `Netflix Password Sharing`: `company_action = SUPPORTED`, `business_outcome = POSITIVE`
+- `Disney+ GroupWatch`: `company_action = PULLED_BACK`, `business_outcome = UNKNOWN`
+- `Hulu Watch Party`: kept in the dataset, but both fields stay `UNKNOWN` because the public commentary is too soft to classify honestly
+
+That last case is intentional. A product team may be tempted to read public commentary as truth. This repo treats that temptation as part of the problem, not as ground truth.
+
+## Key Numbers
+
+| Metric | Supported (n=16) | Pulled Back (n=3) | Primary p-value | Effect size |
+|--------|------------------|-------------------|-----------------|-------------|
+| Search decay | 83.7% ± 16.4% | 92.1% ± 13.7% | 0.284 | d = -0.56 |
+| Reddit mentions | 30.8 ± 35.8 | 4.3 ± 6.7 | 0.144 | d = 1.03 |
+| Negative sentiment | 10.0% ± 9.3% | 13.9% ± 24.1% | 0.774 | d = -0.22 |
+
+Primary p-values use Mann-Whitney U because the pulled-back group is small.
+
+Context coverage:
+
+- 20 features with public decision context
+- 19 features with an action label usable in the main comparison
+- 9 features with a known business outcome
+- 11 context-rich features where business outcome is still unknown
+
+The sample is small, so the repo makes a cautious claim: public signals do not separate supported from pulled-back features cleanly enough to be trusted on their own.
+
+## Why The Finding Is Counter-Intuitive
+
+The usual instinct is simple:
+
+- decay dropped, so the feature is dying
+- people complained, so the feature was a mistake
+
+The dataset keeps breaking that story.
+
+`Netflix Password Sharing`:
+
+- `93%` search decay
+- still clearly supported
+- known positive business outcome
+
+`Disney+ GroupWatch`:
+
+- `100%` search decay
+- pulled back later
+- true audience value still unknown
+
+Same broad public-signal pattern. Different product path. That is the repo's central tension.
+
+## What You See On GitHub
+
+The interactive charts are generated locally, but the repo includes two static previews so the main idea is visible immediately on GitHub.
+
+### Main Signal View
+
+![Static preview of the main decay vs action chart](documentation/assets/decay_vs_action_preview.svg)
+
+What to notice:
+
+- the supported features cluster heavily in the high-decay region too
+- public-signal patterns overlap much more than the simple "decay means failure" story suggests
+
+### Decision Framework Preview
+
+![Static preview of the decision matrix](documentation/assets/decision_matrix_preview.svg)
+
+What to notice:
+
+- steep decay or loud backlash should trigger investigation
+- rollback needs internal evidence, not just external concern
+
+## How A Product Team Should Use This
+
+This repo is not a rollback recommendation engine. It is a decision-quality check.
+
+The intended use is:
+
+1. Notice a worrying external signal like steep search decay or loud backlash.
+2. Use the analysis to challenge the instinct to jump straight from "public concern" to "product verdict."
+3. Pull the internal metrics that actually matter before recommending a rollback.
+4. Treat public signals as prompts for investigation, not as proof.
+
+If you want the product-facing version, start with:
+
+- [How a product team should use this repo](documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md)
+- [What internal data I would require before recommending rollback](documentation/INTERNAL_DATA_FOR_ROLLBACK.md)
+- [One-page decision framework](documentation/DECISION_FRAMEWORK_ONE_PAGER.md)
+- [Architecture overview](documentation/ARCHITECTURE.md)
+
+That is the real contribution here. I am not proving that teams made bad decisions. I am showing why public signals are not enough to justify one.
+
+## What Internal Data I Would Require Before Recommending Rollback
+
+This repo makes one practical point very clearly: external signals are not enough.
+
+Before I would recommend rolling back a feature, I would want internal evidence on:
+
+- adoption by eligible users
+- repeat usage and habit formation
+- retention impact for exposed vs unexposed users
+- monetization or plan-upgrade contribution where relevant
+- value for a niche but strategically important audience
+- implementation cost, maintenance burden, and roadmap tradeoffs
+
+Without that context, "people stopped searching for it" is too weak to be a decision rule.
 
 ## Quick Start
 
-**Prerequisites:** Python 3.9+
+If your machine exposes `python3` instead of `python`, substitute that in the commands below.
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -e .
 
-# Apply verified business outcomes
+# Optional: install test dependencies too
+python -m pip install -e '.[dev]'
+
 python scripts/apply_outcomes.py
-
-# Run statistical tests
 python src/analysis/statistical_analysis.py
-
-# Generate interactive charts
 python scripts/generate_visualizations.py
-
-# Open results
-open results/figures/decay_vs_outcome.html
 ```
 
-**Total time:** 5 minutes
+Or run the one-command script:
 
-## The Numbers
-
-**Dataset:**
-- 36 subscription features analyzed
-- 20 with verified business outcomes
-- 9 companies (Netflix, Spotify, Disney+, YouTube, etc.)
-- 2021-2024 data
-
-**Key Stats:**
-- 16 successes, 4 failures verified
-- 69% of successes show >80% decay
-- Reddit mentions DO predict success (p=0.02)
-- Negative sentiment alone doesn't (p=0.68)
-
-## Project Structure
-
+```bash
+./run_analysis.sh
 ```
-public-signals-mislead/
-├── config/
-│   └── outcomes.py              # 20 verified business outcomes
-├── src/
-│   ├── data_collection/         # Google Trends + Reddit
-│   ├── analysis/                # Statistical tests
-│   └── visualization/           # Charts
-├── data/
-│   ├── trends/                  # Collected data
-│   └── validation/              # Labeled features
-└── results/
-    └── figures/                 # 5 interactive HTML charts
-```
-
-## Data Collection (Already Done)
-
-I spent several days collecting this data:
-
-**Google Trends:**
-- Split into batches (rate limit: ~10 features/hour)
-- Collected daily search interest
-- Calculated peak-based decay
-
-**Reddit Sentiment:**
-- Searched company subreddits
-- 30-90 day post-launch window
-- Keyword-based sentiment analysis
-
-**Business Outcomes:**
-- Verified from earnings calls and press releases
-- Only included features with hard metrics
-
-You can use the provided data - no need to re-collect.
 
 ## Visualizations
 
-5 interactive Plotly charts:
+The repo generates five interactive HTML charts:
 
-1. **Decay vs Outcome** - Shows overlap between success/failure
-2. **Divergence Examples** - Netflix vs Disney+ case studies
-3. **Decision Matrix** - How to interpret mixed signals
-4. **Success by Type** - Which feature categories work
-5. **Statistical Comparison** - Success vs failure metrics
+1. `decay_vs_action.html` - public signals vs observable company action
+2. `divergence_examples.html` - case studies where similar signals lead to different product stories
+3. `decision_matrix.html` - how to use noisy public signals without treating them as verdicts
+4. `action_by_type.html` - observed support rate by feature type
+5. `action_signal_comparison.html` - signal averages for supported vs pulled-back features
 
-All saved as HTML - open in any browser.
+> Interactive charts are generated locally. Run `python scripts/generate_visualizations.py`, then open `results/figures/decay_vs_action.html` in a browser.
 
-## Tech Stack
+## Project Structure
 
-- Python for everything
-- pandas for data wrangling
-- scipy for statistical tests
-- plotly for visualizations
-- PRAW for Reddit API (data already collected)
+```text
+public-signals-mislead/
+├── config/                     # Public decision context + feature typing
+├── documentation/             # Product-facing memo and decision artifacts
+├── notebooks/                 # Lightweight walkthrough for repo readers
+├── src/
+│   ├── analysis/              # Statistical comparisons and sensitivity checks
+│   ├── data_collection/       # Google Trends + Reddit collection pipeline
+│   └── visualization/         # Plotly chart generation
+├── tests/                     # Focused tests for the analysis layer
+├── data/
+│   ├── trends/                # Collected Google Trends outputs
+│   └── validation/            # Labeled dataset + analysis exports
+├── results/figures/           # Regenerated locally, not tracked in git
+└── pyproject.toml             # Package metadata and test config
+```
 
-## Skills Demonstrated
+## What This Repo Does Not Claim
 
-**Decision Science:**
-- Understanding when correlation doesn't mean causation
-- Building validation frameworks
-- Knowing metric limitations
+It does **not** prove that every pulled-back feature was a mistake.
 
-**Statistical Rigor:**
-- Effect sizes matter more than p-values
-- Sample size awareness
-- Conservative interpretation
+It does **not** prove that every supported feature created business value.
 
-**Data Engineering:**
-- API rate limit handling
-- Incremental data collection
-- Data validation
+It does **not** prove that teams actually used Google Trends or Reddit as their decision rule.
 
-**Product Thinking:**
-- User behavior patterns
-- Feature lifecycle understanding
-- Stakeholder communication
+It does show that:
 
-## The Real Insight
+- public signals are weak standalone decision inputs
+- company action is easier to observe than true value
+- soft public commentary should not be treated as outcome proof
+- teams need internal adoption, retention, and revenue context before turning outside noise into a product verdict
 
-High search decay is ambiguous:
+## Why It Matters
 
-**Could mean success (adoption):**
-- Users learned the feature, stopped searching
-- Netflix Password Sharing: Everyone knows about it
-- Spotify AI DJ: Integrated into usage
+For product teams:
 
-**Could mean failure (abandonment):**
-- Users tried it, gave up
-- Netflix Games: Initial curiosity, then nothing
-- Disney+ GroupWatch: Tried once, never again
+- do not auto-roll back a feature just because buzz collapsed
+- do not confuse complaint volume with decision certainty
+- use public signals to trigger questions, not to end the conversation
 
-You need additional signals:
-- Sentiment: Praising or complaining?
-- Engagement: High or low mentions?
-- Context: What type of feature?
+For data teams:
 
-**External signals measure public discussion, not product adoption.**
+- separate what is observable from what is inferred
+- avoid treating unknown business value as hidden certainty
+- be explicit when the sample only supports a cautious conclusion
+
+For hiring managers:
+
+- this repo shows judgment, not just tooling
+- the interesting part is not the test statistic alone
+- the interesting part is drawing a hard boundary around what the public record can and cannot support
 
 ## Contact
 
