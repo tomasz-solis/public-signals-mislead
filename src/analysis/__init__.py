@@ -1,9 +1,4 @@
-"""
-Statistical analysis and ML models.
-
-Modules:
-    - statistical_tests: Statistical tests comparing successes vs failures
-"""
+"""Statistical analysis helpers for public-signal and company-action comparisons."""
 
 from .statistical_analysis import (
     load_labeled_data,
@@ -11,7 +6,7 @@ from .statistical_analysis import (
     test_mentions_difference,
     test_sentiment_difference,
     calculate_correlations,
-    find_high_decay_successes,
+    find_high_decay_supported_features,
     run_all_tests,
     print_results,
     save_results,
@@ -23,7 +18,7 @@ __all__ = [
     "test_mentions_difference",
     "test_sentiment_difference",
     "calculate_correlations",
-    "find_high_decay_successes",
+    "find_high_decay_supported_features",
     "run_all_tests",
     "print_results",
     "save_results",

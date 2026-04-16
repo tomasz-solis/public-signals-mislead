@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "public-signals-mislead"
 version = "0.1.0"
-description = "Analysis of whether public signals predict subscription feature success"
+description = "Decision-support analysis of when public signals mislead product teams"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -21,11 +21,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0"]
+
+[project.scripts]
+apply-outcomes = "src.cli:apply_outcomes_main"
+run-analysis = "src.analysis.statistical_analysis:main"
+generate-viz = "src.cli:generate_viz_main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*", "config*"]
+include = ["src*", "config*", "scripts*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

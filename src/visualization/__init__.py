@@ -1,26 +1,17 @@
-"""
-Interactive Plotly visualizations.
-
-Modules:
-    - charts: Plotly chart generation functions
-"""
+"""Interactive Plotly visualizations for the decision-context framing."""
 
 from .charts import (
-    create_decay_vs_outcome_scatter,
-    create_feature_importance_chart,
+    create_decay_vs_action_scatter,
     create_divergence_comparison,
     create_decision_matrix_heatmap,
-    create_success_rate_by_type,
-    create_statistical_comparison,
-    generate_all_visualizations,
+    create_action_rate_by_type,
+    create_action_comparison,
 )
 
 __all__ = [
-    "create_decay_vs_outcome_scatter",
-    "create_feature_importance_chart",
+    "create_decay_vs_action_scatter",
     "create_divergence_comparison",
     "create_decision_matrix_heatmap",
-    "create_success_rate_by_type",
-    "create_statistical_comparison",
-    "generate_all_visualizations",
+    "create_action_rate_by_type",
+    "create_action_comparison",
 ]

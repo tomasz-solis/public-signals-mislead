@@ -1,8 +1,9 @@
 """
 Reddit sentiment validation package for subscription features.
 
-Provides modular components for validating feature success using Reddit mentions
-and sentiment analysis combined with Google Trends decay data.
+Provides modular components for reading public discussion around feature launches.
+These signals help interpret external reaction patterns. They do not prove
+business success or failure on their own.
 
 Modules:
     - reddit_config: Configuration constants and mappings
@@ -17,7 +18,7 @@ Quick Start:
     # Initialize with auto-detected client
     validator = RedditValidator()
     
-    # Validate a single feature
+    # Validate a single feature's public-signal pattern
     result = validator.validate_feature(
         feature_name="AI DJ",
         company="Spotify",
