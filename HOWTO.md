@@ -3,7 +3,7 @@
 **Time:** 5-10 minutes  
 **Difficulty:** Easy
 
-If your machine exposes `python3` instead of `python`, substitute that in the commands below.
+Use a repo-local virtualenv from the project root:
 
 ## Setup
 
@@ -14,9 +14,11 @@ git clone https://github.com/yourusername/public-signals-mislead.git
 cd public-signals-mislead
 ```
 
-### 2. Install the Project
+### 2. Create and Install the Project Environment
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 python -m pip install -e .
 ```
 
@@ -24,6 +26,12 @@ Optional, if you want to run tests too:
 
 ```bash
 python -m pip install -e '.[dev]'
+```
+
+If the repo was moved after `venv` was created and activation starts behaving strangely, rebuild it:
+
+```bash
+./scripts/rebuild_venv.sh
 ```
 
 ### 2.5 Environment Setup (Optional)
@@ -80,7 +88,7 @@ python -m pytest tests -v
 Expected result:
 
 ```text
-============================== 7 passed in ...
+============================== 46 passed in ...
 ```
 
 ### Step 3: Run the Statistical Analysis
@@ -151,6 +159,14 @@ That script now detects `python` vs `python3` automatically and installs the loc
 ### `python: command not found`
 
 Use `python3` instead.
+
+### `(venv)` is shown, but `python` still is not found
+
+The virtualenv was probably created before the repo was moved or renamed. Rebuild it:
+
+```bash
+./scripts/rebuild_venv.sh
+```
 
 ### `ModuleNotFoundError`
 

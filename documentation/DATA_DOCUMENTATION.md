@@ -58,6 +58,8 @@ Why global? Netflix, Spotify, Disney+ are international. Password sharing was wo
 - Public JSON: ~30 requests/minute
 - Total time: 1-2 hours for all companies
 
+**Sentiment method:** Lexicon matching against 30 hand-picked positive and negative keywords. This is a crude baseline, not a state-of-the-art NLP pipeline. The choice is deliberate: a noisy measurement of an already-noisy signal is consistent with the project thesis. If this method cannot distinguish supported from pulled-back features, a more sophisticated classifier is unlikely to rescue the signal. The full keyword list is in `src/data_collection/reddit/reddit_validator.py`.
+
 ## Data Processing
 
 ### Raw → Cleaned

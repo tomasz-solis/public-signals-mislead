@@ -1,10 +1,15 @@
 # Public Signals Mislead
 
-**Thesis:** public signals mislead product teams when used without internal context.
+Netflix's password sharing crackdown lost 93% of its search interest within four weeks of peak — and added 9.3M paid subscribers the same quarter. If you had used public signals to recommend a rollback, you would have killed one of Netflix's most successful product decisions of the decade.
 
-This repo studies a narrow but practical problem: search trends, Reddit chatter, and launch buzz often look more decisive than they really are. A feature can lose public attention fast, attract noisy complaints, or even get rolled back later, and none of that cleanly tells us what the feature was worth to the business or to a specific user segment.
+This repo studies that gap. Across 36 subscription features, 69% of the ones companies kept backing still show more than 80% search decay. Public attention resolves much faster than product value does, and external signals like Google Trends or Reddit reaction are weak standalone inputs for product decisions — especially when the internal metrics that matter most are invisible from the outside.
 
-The point is not "Google Trends predicts business success." It does not. The point is that public signals are weak standalone inputs for product decisions, especially when the internal metrics that matter most are invisible from the outside.
+The repo separates two ideas that should not be mixed:
+
+- `company_action`: what the public record shows the company did
+- `business_outcome`: what the public record can actually prove about value
+
+Removal is observable. True value often is not. That distinction is the backbone of the analysis.
 
 The repo is written as a decision-support case study, not a model demo. The work is organized around three questions:
 
@@ -48,7 +53,7 @@ Headline result:
 - Supported features average `83.7%` search decay
 - Pulled-back features average `92.1%` search decay
 - Primary p-value is `0.284` with Mann-Whitney U
-- `69%` of supported features still show more than `80%` decay
+- `69%` of supported features still show more than `80%` decay (95% CI: 44%–86%, n=16)
 
 The strongest interpretation is not "decay means nothing." It is narrower:
 
@@ -82,9 +87,9 @@ That last case is intentional. A product team may be tempted to read public comm
 
 | Metric | Supported (n=16) | Pulled Back (n=3) | Primary p-value | Effect size |
 |--------|------------------|-------------------|-----------------|-------------|
-| Search decay | 83.7% ± 16.4% | 92.1% ± 13.7% | 0.284 | d = -0.56 |
-| Reddit mentions | 30.8 ± 35.8 | 4.3 ± 6.7 | 0.144 | d = 1.03 |
-| Negative sentiment | 10.0% ± 9.3% | 13.9% ± 24.1% | 0.774 | d = -0.22 |
+| Search decay | 83.7% ± 16.4% | 92.1% ± 13.7% | 0.284 | d = -0.52 |
+| Reddit mentions | 30.8 ± 35.8 | 4.3 ± 6.7 | 0.144 | d = 0.78 |
+| Negative sentiment | 10.0% ± 9.3% | 13.9% ± 24.1% | 0.774 | d = -0.33 |
 
 Primary p-values use Mann-Whitney U because the pulled-back group is small.
 
@@ -96,6 +101,10 @@ Context coverage:
 - 11 context-rich features where business outcome is still unknown
 
 The sample is small, so the repo makes a cautious claim: public signals do not separate supported from pulled-back features cleanly enough to be trusted on their own.
+
+### Sentiment Methodology
+
+Reddit sentiment is computed by lexicon matching against 30 hand-picked positive and negative keywords. This is a deliberately crude method. A noisy measurement of an already-noisy signal reinforces the thesis: if sentiment computed this way still fails to distinguish supported from pulled-back features, a more sophisticated method is unlikely to rescue the signal. The lexicon is inspectable and swappable in `src/data_collection/reddit/reddit_validator.py`.
 
 ## Why The Finding Is Counter-Intuitive
 
@@ -155,6 +164,7 @@ The intended use is:
 
 If you want the product-facing version, start with:
 
+- [Netflix password sharing case study](NETFLIX_CASE_STUDY.md) — the single best example of when public signals mislead
 - [How a product team should use this repo](documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md)
 - [What internal data I would require before recommending rollback](documentation/INTERNAL_DATA_FOR_ROLLBACK.md)
 - [One-page decision framework](documentation/DECISION_FRAMEWORK_ONE_PAGER.md)
@@ -179,9 +189,11 @@ Without that context, "people stopped searching for it" is too weak to be a deci
 
 ## Quick Start
 
-If your machine exposes `python3` instead of `python`, substitute that in the commands below.
+Create the local environment from the repo root:
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 python -m pip install -e .
 
 # Optional: install test dependencies too
@@ -196,6 +208,12 @@ Or run the one-command script:
 
 ```bash
 ./run_analysis.sh
+```
+
+If the repo was moved or renamed after `venv` was created, rebuild it:
+
+```bash
+./scripts/rebuild_venv.sh
 ```
 
 ## Visualizations

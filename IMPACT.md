@@ -64,11 +64,6 @@ That is much stronger than forcing every feature into a fake success/failure lab
 
 ### Main Statistical Result
 
-<<<<<<< HEAD
-Multi-signal validation achieves reasonable accuracy:
-- High decay + positive sentiment + high mentions = ADOPTION
-- High decay + negative sentiment = ABANDONMENT
-=======
 - Supported features: `83.7%` average search decay
 - Pulled-back features: `92.1%` average search decay
 - Mann-Whitney U p-value: `0.284`
@@ -246,4 +241,3 @@ This repo shows five things that matter in senior product analytics work:
 5. turn analysis into a practical decision frame
 
 That is what makes the project stronger than a generic model demo. It has a clear claim, a real limitation, and a point of view worth discussing.
->>>>>>> d291a23 (docs(portfolio): add architecture, walkthrough, and chart previews)
