@@ -57,7 +57,7 @@ def main() -> None:
     out_path = VALIDATION_DIR / "labeled_features.csv"
     df.to_csv(out_path, index=False)
 
-    print(f"✓ Saved labeled dataset: {out_path}")
+    print(f"Saved labeled dataset: {out_path}")
     print("\nPublic-signal label counts:")
     print(df["signal_label"].value_counts(dropna=False))
 

@@ -90,7 +90,7 @@ def enforce_feature_company_guard(feature_name: str, company: str) -> bool:
     if company in allowed:
         return True
 
-    print(f"⚠ Guardrail: '{feature_name}' expected in {allowed}, got '{company}' - skipping to avoid cross-product mixing")
+    print(f"[skip] Guardrail: '{feature_name}' expected in {allowed}, got '{company}' - skipping to avoid cross-product mixing")
     return False
 
 
@@ -180,10 +180,10 @@ class RedditValidator:
                     user_agent="feature-validator/1.0"
                 )
                 self.client = PrawRedditClient(reddit)
-                print("✓ Using PRAW (authenticated Reddit API)")
+                print("[info] Using PRAW (authenticated Reddit API)")
             else:
                 self.client = PublicRedditClient()
-                print("⚠ Missing credentials - using public JSON (slower)")
+                print("[warn] Missing credentials - using public JSON (slower)")
         else:
             self.client = PublicRedditClient()
             print("Using public JSON client")
@@ -196,7 +196,7 @@ class RedditValidator:
         """
         subreddit = self.subreddits.get(company)
         if not subreddit:
-            print(f"⚠ No subreddit mapped for {company}")
+            print(f"[warn] No subreddit mapped for {company}")
             return []
 
         # Time window: 30 days before to 90 days after launch
@@ -368,7 +368,7 @@ class RedditValidator:
         Returns dict with all validation results.
         """
         print(f"\n{'='*80}")
-        print(f"🔍 VALIDATING: {feature_name} ({company})")
+        print(f"VALIDATING: {feature_name} ({company})")
         print(f"{'='*80}")
 
         mentions = self.search_feature_mentions(feature_name, company, launch_date, search_keywords)

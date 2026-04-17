@@ -57,7 +57,7 @@ def validate_all_features_from_csv(
     if feature_filter is not None and len(feature_filter) > 0:
         metrics = metrics[metrics["feature_name"].isin(feature_filter)]
         if metrics.empty:
-            print(f"⚠ No rows matched feature_filter={feature_filter}")
+            print(f"[warn] No rows matched feature_filter={feature_filter}")
             return
 
     # Map feature_id -> keyword for company inference
@@ -102,7 +102,7 @@ def validate_all_features_from_csv(
 
         # Validate company can be mapped to subreddit
         if (not company) or (company not in validator.subreddits):
-            print(f"⚠ Skipping '{feature_name}' - missing/unmapped company (company='{company}')")
+            print(f"[skip] '{feature_name}' - missing/unmapped company (company='{company}')")
             continue
 
         # Get search decay
@@ -127,7 +127,7 @@ def validate_all_features_from_csv(
 
     # Save results
     if not results:
-        print("⚠ No features validated. Check company mappings and filters.")
+        print("[warn] No features validated. Check company mappings and filters.")
         return
 
     results_df = pd.DataFrame(results)
@@ -140,17 +140,17 @@ def validate_all_features_from_csv(
         combined = pd.concat([existing, results_df], ignore_index=True)
         combined = combined.drop_duplicates(subset=["feature_name", "company"], keep="last")
         combined.to_csv(out_path, index=False)
-        print(f"\n✓ Merged {len(results_df)} new results into existing file")
+        print(f"\nMerged {len(results_df)} new results into existing file")
     else:
         results_df.to_csv(out_path, index=False)
-        print(f"\n✓ Saved {len(results_df)} results to new file")
+        print(f"\nSaved {len(results_df)} results to new file")
 
     # Summary
     print(f"\n{'='*80}")
     print("VALIDATION SUMMARY")
     print(f"{'='*80}")
     print(results_df[["feature_name", "company", "search_decay", "sentiment_label", "total_mentions", "classification"]])
-    print(f"\n✓ Results saved to: {out_path}")
+    print(f"\nResults saved to: {out_path}")
     
     classification_counts = results_df["classification"].value_counts()
     print("\nClassification:")

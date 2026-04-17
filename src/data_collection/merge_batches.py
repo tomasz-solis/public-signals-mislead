@@ -11,10 +11,14 @@ any rows for the same feature from other batches.
 Usage: python src/data_collection/merge_batches.py
 """
 
+import logging
 from pathlib import Path
 from typing import List
 
 import pandas as pd
+
+
+logger = logging.getLogger(__name__)
 
 
 DATA_DIR = Path("data/trends")
@@ -51,9 +55,9 @@ def merge_trends() -> pd.DataFrame:
     if not trend_files:
         raise FileNotFoundError(f"No trend files matching {pattern} in {DATA_DIR}")
 
-    print("🧩 Merging trends files:")
+    logger.info("Merging trends files:")
     for f in trend_files:
-        print(f"   - {f.name}")
+        logger.info("   - %s", f.name)
 
     trends = _load_with_source(trend_files, TRENDS_REQUIRED_COLUMNS)
 
@@ -67,13 +71,13 @@ def merge_trends() -> pd.DataFrame:
     extended_mask = trends["source_file"].str.contains(EXTENDED_TAG, na=False)
     extended_ids = trends.loc[extended_mask, "feature_id"].unique()
 
-    print(f"\n🔍 Found {len(extended_ids)} feature(s) in extended batch: {extended_ids.tolist()}")
+    logger.info("Found %d feature(s) in extended batch: %s", len(extended_ids), extended_ids.tolist())
 
     if len(extended_ids) > 0:
         before_rows = len(trends)
         trends = trends[(~trends["feature_id"].isin(extended_ids)) | extended_mask].copy()
         after_rows = len(trends)
-        print(f"   → Dropped {before_rows - after_rows} shorter-window rows for extended features")
+        logger.info("Dropped %d shorter-window rows for extended features", before_rows - after_rows)
 
     # Sort and clean
     if "date" in trends.columns:
@@ -85,8 +89,8 @@ def merge_trends() -> pd.DataFrame:
 
     out_path = DATA_DIR / "MERGED_trends_data.csv"
     trends.to_csv(out_path, index=False)
-    print(f"\n✓ Saved merged trends to: {out_path}")
-    print(f"   Total rows: {len(trends)}, Features: {trends['feature_id'].nunique()}")
+    logger.info("Saved merged trends to: %s", out_path)
+    logger.info("Total rows: %d, Features: %d", len(trends), trends["feature_id"].nunique())
 
     return trends
 
@@ -99,9 +103,9 @@ def merge_metrics() -> pd.DataFrame:
     if not metric_files:
         raise FileNotFoundError(f"No metrics files matching {pattern} in {DATA_DIR}")
 
-    print("\n🧩 Merging metrics files:")
+    logger.info("Merging metrics files:")
     for f in metric_files:
-        print(f"   - {f.name}")
+        logger.info("   - %s", f.name)
 
     metrics = _load_with_source(metric_files, METRICS_REQUIRED_COLUMNS)
 
@@ -114,13 +118,13 @@ def merge_metrics() -> pd.DataFrame:
     extended_mask = metrics["source_file"].str.contains(EXTENDED_TAG, na=False)
     extended_ids = metrics.loc[extended_mask, "feature_id"].unique()
 
-    print(f"\n🔍 Found {len(extended_ids)} feature(s) in extended metrics batch: {extended_ids.tolist()}")
+    logger.info("Found %d feature(s) in extended metrics batch: %s", len(extended_ids), extended_ids.tolist())
 
     if len(extended_ids) > 0:
         before_rows = len(metrics)
         metrics = metrics[(~metrics["feature_id"].isin(extended_ids)) | extended_mask].copy()
         after_rows = len(metrics)
-        print(f"   → Dropped {before_rows - after_rows} older metric rows for extended features")
+        logger.info("Dropped %d older metric rows for extended features", before_rows - after_rows)
 
     # Deduplicate (keep last/extended)
     metrics = (
@@ -133,17 +137,18 @@ def merge_metrics() -> pd.DataFrame:
 
     out_path = DATA_DIR / "MERGED_decay_metrics.csv"
     metrics.to_csv(out_path, index=False)
-    print(f"\n✓ Saved merged metrics to: {out_path}")
-    print(f"   Total features: {metrics['feature_id'].nunique()}")
+    logger.info("Saved merged metrics to: %s", out_path)
+    logger.info("Total features: %d", metrics["feature_id"].nunique())
 
     return metrics
 
 
 def main() -> None:
-    print("📦 Starting batch merge\n")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    print("Starting batch merge\n")
     merge_trends()
     merge_metrics()
-    print("\n🎉 Merging complete. Run recalculate_with_peaks.py on MERGED_trends_data.csv")
+    print("\nMerging complete. Run recalculate_with_peaks.py on MERGED_trends_data.csv")
 
 
 if __name__ == "__main__":

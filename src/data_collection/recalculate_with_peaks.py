@@ -191,11 +191,11 @@ def main() -> None:
     
     args = parser.parse_args()
     
-    print(f"📂 Loading trends data from: {args.input}")
+    print(f"Loading trends data from: {args.input}")
     trends_df = pd.read_csv(args.input)
     print(f"   Loaded {len(trends_df)} rows for {trends_df['feature_name'].nunique()} features")
     
-    print("\n🔄 Recalculating metrics using peak dates...")
+    print("\nRecalculating metrics using peak dates...")
     metrics_df = recalculate_all_metrics(trends_df)
     
     print_analysis(metrics_df)
@@ -208,7 +208,7 @@ def main() -> None:
         output_path = input_path.parent / f"{input_path.stem}_PEAK_metrics.csv"
     
     metrics_df.to_csv(output_path, index=False)
-    print(f"\n✓ Saved to: {output_path}")
+    print(f"\nSaved to: {output_path}")
 
 
 if __name__ == "__main__":

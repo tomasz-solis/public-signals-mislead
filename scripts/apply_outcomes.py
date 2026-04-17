@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 from config.outcomes import get_feature_context, get_feature_type
+from src.provenance import stamp_provenance
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,12 @@ def apply_outcomes_to_csv() -> pd.DataFrame:
     df["feature_type_calc"] = df["feature_name"].apply(get_feature_type)
     df["action_binary"] = df["company_action"].map(ACTION_BINARY_MAP).astype("Int64")
     df["business_outcome_binary"] = df["business_outcome"].map(BUSINESS_OUTCOME_BINARY_MAP).astype("Int64")
+
+    stamp_provenance(
+        df,
+        input_paths=[csv_path],
+        config_path=PROJECT_ROOT / "config" / "outcomes.py",
+    )
 
     df.to_csv(csv_path, index=False)
 
