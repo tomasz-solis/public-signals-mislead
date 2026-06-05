@@ -146,9 +146,9 @@ def validate_all_features_from_csv(
         print(f"\nSaved {len(results_df)} results to new file")
 
     # Summary
-    print(f"\n{'='*80}")
+    print()
     print("VALIDATION SUMMARY")
-    print(f"{'='*80}")
+    print()
     print(results_df[["feature_name", "company", "search_decay", "sentiment_label", "total_mentions", "classification"]])
     print(f"\nResults saved to: {out_path}")
     
@@ -178,14 +178,14 @@ def main() -> None:
     companies_filter = None
     if args.companies:
         companies_filter = [c.strip() for c in args.companies.split(",") if c.strip()]
-        print(f"🔧 Filtering to companies: {companies_filter}")
+        print(f"Filtering to companies: {companies_filter}")
     else:
-        print("🔧 No company filter - processing all companies")
+        print("No company filter; processing all companies")
 
     feature_filter = None
     if args.features:
         feature_filter = [f.strip() for f in args.features.split(",") if f.strip()]
-        print(f"🔧 Filtering to features: {feature_filter}")
+        print(f"Filtering to features: {feature_filter}")
 
     # Run validation
     validate_all_features_from_csv(

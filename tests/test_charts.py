@@ -1,6 +1,6 @@
 """Smoke tests for SVG preview chart generation.
 
-These don't validate chart content in detail — they verify that the
+These don't validate chart content in detail - they verify that the
 SVG files are created, well-formed, and contain expected landmarks.
 """
 

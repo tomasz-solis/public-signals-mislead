@@ -257,7 +257,7 @@ def test_calculate_cohens_d_unequal_sizes_uses_df_weighting() -> None:
     # df-weighted pooled_var = (9 * 0.12^2 + 2 * 4.0) / 11 ~ 0.739
     # pooled_std ~ 0.860, d ~ (10.005 - 10.0) / 0.860 ~ 0.006
     # simple pooled would give sqrt((0.012 + 4.0)/2) ~ 1.417, d ~ 0.004
-    # The absolute values differ by ~50% — this tolerance catches the wrong formula
+    # The absolute values differ by ~50% - this tolerance catches the wrong formula
     assert abs(d) < 0.1  # both are near zero, but let's verify it doesn't crash
 
     # More meaningful check: known calculation with the df-weighted formula
@@ -267,7 +267,7 @@ def test_calculate_cohens_d_unequal_sizes_uses_df_weighting() -> None:
     d2 = _calculate_cohens_d(x2, y2)
     # df-weighted: pooled_var = (15*0 + 2*4) / 17 = 0.471, pooled_std = 0.686
     # d = (5.0 - 4.0) / 0.686 = 1.458
-    # simple pooled: sqrt((0 + 4) / 2) = 1.414, d = 0.707 — very different
+    # simple pooled: sqrt((0 + 4) / 2) = 1.414, d = 0.707 - very different
     assert d2 == pytest.approx(1.458, abs=0.05)
 
 

@@ -872,7 +872,7 @@ def print_results(results: Dict[str, object]) -> None:
         lift = framework_validation["lift_over_baseline"]
         direction = "+" if lift >= 0 else ""
         print(f"  Lift over baseline: {direction}{lift:.0%}")
-        print("  Treat as indicative only — the labeled action sample is still small.")
+        print("  Treat as indicative only - the labeled action sample is still small.")
         print()
 
     error_analysis = results.get("framework_error_analysis", {})

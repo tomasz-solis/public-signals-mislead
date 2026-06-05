@@ -147,7 +147,7 @@ def print_analysis(metrics_df: pd.DataFrame) -> None:
     print("\nRECALCULATED METRICS - Peak-Based Methodology\n")
     
     print(f"{'Feature':<35} {'Days to Peak':<15} {'W4 Decay':<12} {'W8 Decay':<12} {'Class':<10}")
-    print("-"*100)
+    print()
     
     for _, row in metrics_df.iterrows():
         decay_w4 = f"{row['decay_rate_w4']:.1%}" if pd.notna(row['decay_rate_w4']) else "N/A"

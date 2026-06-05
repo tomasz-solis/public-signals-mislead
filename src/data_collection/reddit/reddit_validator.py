@@ -367,9 +367,9 @@ class RedditValidator:
         Run full validation pipeline: search Reddit → analyze sentiment → classify.
         Returns dict with all validation results.
         """
-        print(f"\n{'='*80}")
+        print()
         print(f"VALIDATING: {feature_name} ({company})")
-        print(f"{'='*80}")
+        print()
 
         mentions = self.search_feature_mentions(feature_name, company, launch_date, search_keywords)
         sentiment = self.analyze_sentiment(mentions)

@@ -12,9 +12,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo ""
-echo "================================================================================"
 echo "  Public Signals Mislead: Complete Analysis"
-echo "================================================================================"
 echo ""
 
 # Resolve Python command
@@ -55,41 +53,29 @@ if ! $PYTHON_CMD -c "import src, config, pandas, scipy, plotly" 2>/dev/null; the
     echo ""
 fi
 
-echo -e "${GREEN}✅ Project environment ready${NC}"
+echo -e "${GREEN}Project environment ready${NC}"
 echo ""
 
-# Step 1: Apply decision context
-echo "================================================================================"
-echo "  Step 1/3: Applying Decision Context"
-echo "================================================================================"
+echo "Applying decision context"
 echo ""
 $PYTHON_CMD scripts/apply_outcomes.py
 echo ""
 
-# Step 2: Statistical analysis
-echo "================================================================================"
-echo "  Step 2/3: Running Decision-Support Analysis"
-echo "================================================================================"
+echo "Running decision-support analysis"
 echo ""
 $PYTHON_CMD src/analysis/statistical_analysis.py
 echo ""
 
-# Step 3: Generate visualizations
-echo "================================================================================"
-echo "  Step 3/3: Generating Interactive Charts"
-echo "================================================================================"
+echo "Generating interactive charts"
 echo ""
 $PYTHON_CMD scripts/generate_visualizations.py
 echo ""
 
-# Summary
-echo "================================================================================"
-echo -e "  ${GREEN}✅ ANALYSIS COMPLETE${NC}"
-echo "================================================================================"
+echo -e "${GREEN}Analysis complete${NC}"
 echo ""
 echo "Results saved to:"
-echo "  📊 Statistical results: data/validation/statistical_results.csv"
-echo "  📈 Interactive charts:  results/figures/*.html"
+echo "  Statistical results: data/validation/statistical_results.csv"
+echo "  Interactive charts:  results/figures/*.html"
 echo ""
 echo "View main chart:"
 echo "  open results/figures/decay_vs_action.html"
