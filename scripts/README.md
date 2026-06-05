@@ -4,7 +4,7 @@
 
 ### One-Time Setup (Already Done)
 1. `create_labeled_dataset.py` - Merge inventory + Reddit results
-   - **Only run if you collect new Reddit data**
+   - Only run if you collect new Reddit data
    - Creates `data/validation/labeled_features.csv`
 
 ### Every Analysis Run

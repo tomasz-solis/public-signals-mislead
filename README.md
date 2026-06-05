@@ -1,8 +1,14 @@
 # Public Signals Mislead
 
-Netflix's password sharing crackdown lost 93% of its search interest within four weeks of peak — and added 9.3M paid subscribers the same quarter. If you had used public signals to recommend a rollback, you would have killed one of Netflix's most successful product decisions of the decade.
+Netflix's password-sharing crackdown lost 93% of its search interest within four
+weeks of peak and added 9.3M paid subscribers in the same quarter. A public-signal
+read would have pointed in the wrong direction.
 
-This repo studies that gap. Across 36 subscription features, 69% of the ones companies kept backing still show more than 80% search decay. Public attention resolves much faster than product value does, and external signals like Google Trends or Reddit reaction are weak standalone inputs for product decisions — especially when the internal metrics that matter most are invisible from the outside.
+This repo studies that gap. Across 36 subscription features, 69% of the ones
+companies kept backing still show more than 80% search decay. Public attention
+resolves much faster than product value does. Google Trends and Reddit reaction
+are useful prompts for investigation, but weak standalone inputs for product
+decisions when adoption, retention, and revenue are hidden.
 
 The repo separates two ideas that should not be mixed:
 
@@ -17,7 +23,7 @@ The repo is written as a decision-support case study, not a model demo. The work
 - what remains unknown without internal product data
 - where teams are most likely to overread noisy public signals
 
-## The Product Question
+## Product Question
 
 A feature launches. Search interest drops a month later. Reddit gets loud. The tempting story is:
 
@@ -25,7 +31,7 @@ A feature launches. Search interest drops a month later. Reddit gets loud. The t
 - backlash means the feature is failing
 - rollback is the safe move
 
-This repo pushes back on that shortcut.
+This repo tests that shortcut.
 
 What the public record usually can show:
 
@@ -53,7 +59,7 @@ Headline result:
 - Supported features average `83.7%` search decay
 - Pulled-back features average `92.1%` search decay
 - Primary p-value is `0.284` with Mann-Whitney U
-- `69%` of supported features still show more than `80%` decay (95% CI: 44%–86%, n=16)
+- `69%` of supported features still show more than `80%` decay (95% CI: 44% - 86%, n=16)
 
 The strongest interpretation is not "decay means nothing." It is narrower:
 
@@ -106,7 +112,7 @@ The sample is small, so the repo makes a cautious claim: public signals do not s
 
 Reddit sentiment is computed by lexicon matching against 30 hand-picked positive and negative keywords. This is a deliberately crude method. A noisy measurement of an already-noisy signal reinforces the thesis: if sentiment computed this way still fails to distinguish supported from pulled-back features, a more sophisticated method is unlikely to rescue the signal. The lexicon is inspectable and swappable in `src/data_collection/reddit/reddit_validator.py`.
 
-## Why The Finding Is Counter-Intuitive
+## Why The Finding Is Easy To Misread
 
 The usual instinct is simple:
 
@@ -129,7 +135,7 @@ The dataset keeps breaking that story.
 
 Same broad public-signal pattern. Different product path. That is the repo's central tension.
 
-## What You See On GitHub
+## GitHub Previews
 
 The interactive charts are generated locally, but the repo includes two static previews so the main idea is visible immediately on GitHub. The first preview deliberately simplifies the full bubble chart so the overlap is readable in a static README.
 
@@ -151,7 +157,7 @@ What to notice:
 - steep decay or loud backlash should trigger investigation
 - rollback needs internal evidence, not just external concern
 
-## How A Product Team Should Use This
+## Product Use
 
 This repo is not a rollback recommendation engine. It is a decision-quality check.
 
@@ -164,13 +170,14 @@ The intended use is:
 
 If you want the product-facing version, start with:
 
-- [Netflix password sharing case study](NETFLIX_CASE_STUDY.md) — the single best example of when public signals mislead
+- [Netflix password sharing case study](NETFLIX_CASE_STUDY.md) - the single best example of when public signals mislead
 - [How a product team should use this repo](documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md)
 - [What internal data I would require before recommending rollback](documentation/INTERNAL_DATA_FOR_ROLLBACK.md)
 - [One-page decision framework](documentation/DECISION_FRAMEWORK_ONE_PAGER.md)
 - [Architecture overview](documentation/ARCHITECTURE.md)
 
-That is the real contribution here. I am not proving that teams made bad decisions. I am showing why public signals are not enough to justify one.
+That is the useful boundary. The repo does not prove that teams made good or bad
+decisions. It shows why public signals are not enough to justify one.
 
 ## What Internal Data I Would Require Before Recommending Rollback
 
@@ -249,11 +256,11 @@ public-signals-mislead/
 
 ## What This Repo Does Not Claim
 
-It does **not** prove that every pulled-back feature was a mistake.
+It does not prove that every pulled-back feature was a mistake.
 
-It does **not** prove that every supported feature created business value.
+It does not prove that every supported feature created business value.
 
-It does **not** prove that teams actually used Google Trends or Reddit as their decision rule.
+It does not prove that teams actually used Google Trends or Reddit as their decision rule.
 
 It does show that:
 
@@ -262,7 +269,7 @@ It does show that:
 - soft public commentary should not be treated as outcome proof
 - teams need internal adoption, retention, and revenue context before turning outside noise into a product verdict
 
-## Why It Matters
+## Operating Implications
 
 For product teams:
 
@@ -275,12 +282,6 @@ For data teams:
 - separate what is observable from what is inferred
 - avoid treating unknown business value as hidden certainty
 - be explicit when the sample only supports a cautious conclusion
-
-For hiring managers:
-
-- this repo shows judgment, not just tooling
-- the interesting part is not the test statistic alone
-- the interesting part is drawing a hard boundary around what the public record can and cannot support
 
 ## Contact
 

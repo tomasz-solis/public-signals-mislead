@@ -6,13 +6,13 @@ This document explains data sources, collection methodology, and reproducibility
 
 ### Feature Inventory (`data/raw/feature_inventory.csv`)
 
-**Source:** Manually compiled from company press releases
+Source: Manually compiled from company press releases
 - Spotify Newsroom, Netflix About, YouTube Blog, Disney Newsroom
 - Earnings call transcripts (public)
 
-**Coverage:** 50 features from Nov 2021 to Dec 2024
+Coverage: 50 features from Nov 2021 to Dec 2024
 
-**Columns:**
+Columns:
 - `feature_id`: Unique identifier (1-50)
 - `feature_name`: Human-readable name
 - `company`: Platform (Spotify, Netflix, YouTube, etc.)
@@ -25,51 +25,51 @@ This document explains data sources, collection methodology, and reproducibility
 
 ### Google Trends Data (`data/trends/`)
 
-**Tool:** `pytrends` library (unofficial Google Trends API)
+Tool: `pytrends` library (unofficial Google Trends API)
 
-**Collection Window:**
+Collection Window:
 - 14 days before launch
 - 98 days (14 weeks) after launch
 - Total: 112 days per feature
 
 Why extended window? Some features peaked 55 days after launch.
 
-**Rate Limiting:**
+Rate Limiting:
 - Batch size: 10 features
 - Delay between requests: 10 seconds
 - Delay between batches: 24 hours
 - Total collection: ~5 days
 
-**Geography:** Global (not US-only)
+Geography: Global (not US-only)
 
 Why global? Netflix, Spotify, Disney+ are international. Password sharing was worldwide news. We're measuring relative patterns, not absolute volumes.
 
 ### Reddit Data (`data/validation/`)
 
-**Tool:** PRAW (Python Reddit API Wrapper) with public JSON fallback
+Tool: PRAW (Python Reddit API Wrapper) with public JSON fallback
 
-**Collection:**
+Collection:
 - Company subreddits (r/netflix, r/spotify, etc.)
 - 30-90 day post-launch window
 - Keyword-based sentiment analysis
 
-**Rate Limiting:**
+Rate Limiting:
 - PRAW: ~60 requests/minute
 - Public JSON: ~30 requests/minute
 - Total time: 1-2 hours for all companies
 
-**Sentiment method:** Lexicon matching against 30 hand-picked positive and negative keywords. This is a crude baseline, not a state-of-the-art NLP pipeline. The choice is deliberate: a noisy measurement of an already-noisy signal is consistent with the project thesis. If this method cannot distinguish supported from pulled-back features, a more sophisticated classifier is unlikely to rescue the signal. The full keyword list is in `src/data_collection/reddit/reddit_validator.py`.
+Sentiment method: Lexicon matching against 30 hand-picked positive and negative keywords. This is a crude baseline, not a advanced NLP pipeline. The choice is deliberate: a noisy measurement of an already-noisy signal is consistent with the project thesis. If this method cannot distinguish supported from pulled-back features, a more sophisticated classifier is unlikely to rescue the signal. The full keyword list is in `src/data_collection/reddit/reddit_validator.py`.
 
 ## Data Processing
 
 ### Raw → Cleaned
 
-**1. Merge batches** (`merge_batches.py`)
+1. Merge batches (`merge_batches.py`)
 - Combines 5 batch collections
 - Removes duplicates
 - Output: `MERGED_trends_data.csv`
 
-**2. Peak-based recalculation** (`recalculate_with_peaks.py`)
+2. Peak-based recalculation (`recalculate_with_peaks.py`)
 - Finds actual peak date (not launch date)
 - Calculates decay from peak
 - Output: `MERGED_trends_data_PEAK_metrics.csv`
@@ -78,17 +78,17 @@ Why global? Netflix, Spotify, Disney+ are international. Password sharing was wo
 
 Features don't peak on launch day.
 
-**Examples:**
+Examples:
 - Paramount+ Live Sports: Launched Mar 1, peaked Mar 25 (24 days later)
 - Apple Music Family: Launched Oct 15, peaked Nov 29 (45 days later)
 
-**Reason:** Users search when they have a problem (key game, pricing question), not when feature launches.
+Reason: Users search when they have a problem (key game, pricing question), not when feature launches.
 
-**Impact:** Launch-based calculation shows 0.7% decay (false "sticky"). Peak-based shows 73% decay (correct "novelty").
+Impact: Launch-based calculation shows 0.7% decay (false "sticky"). Peak-based shows 73% decay (correct "novelty").
 
 ## Final Metrics
 
-**Stickiness Metrics:**
+Stickiness Metrics:
 - `days_to_peak`: Days between launch and peak
 - `peak_interest`: Google Trends score (0-100, normalized)
 - `week_4_interest`: Average interest 21-28 days after peak
@@ -96,7 +96,7 @@ Features don't peak on launch day.
 - `decay_rate_w4`: (peak - week_4) / peak
 - `decay_rate_w8`: (peak - week_8) / peak
 
-**Classification:**
+Classification:
 - `sticky`: <30% decay
 - `mixed`: 30-70% decay
 - `novelty`: >70% decay
@@ -170,45 +170,45 @@ Core patterns (sticky vs novelty) should remain consistent.
 
 ## Data Sharing
 
-**Included in repo:**
+Included in repo:
 - Feature inventory
 - Final metrics
 - Sample trends data (5 features)
 - All code
 
-**Not included:**
+Not included:
 - Full raw trends data (~2-5 MB)
 - Intermediate batch files
 
 Rationale: Raw data is reproducible via scripts. GitHub best practice: keep data <1 MB.
 
-**To access full dataset:** Contact me or run collection scripts (5 days due to rate limits).
+To access full dataset: Contact me or run collection scripts (5 days due to rate limits).
 
 ## Quality Checks
 
-**Validation:**
+Validation:
 - Launch dates verified against official sources
 - Keywords tested manually on trends.google.com
 - Duplicates removed after batch merging
 - Peak dates inspected visually
 - Decay calculations spot-checked
 
-**Known issues:**
+Known issues:
 - Netflix Extra Member: No search volume (keyword too specific)
 - [Other features with low volume excluded]
 
 ## References
 
-**Google Trends:**
+Google Trends:
 - Official: trends.google.com
 - API: github.com/GeneralMills/pytrends
 - Methodology: support.google.com/trends/answer/4365533
 
-**Company sources:** See feature_inventory.csv
+Company sources: See feature_inventory.csv
 
-**Last updated:** December 2024
-**Geographic coverage:** Global
-**Feature period:** November 2021 - December 2024
+Last updated: December 2024
+Geographic coverage: Global
+Feature period: November 2021 - December 2024
 
 ## Contact
 

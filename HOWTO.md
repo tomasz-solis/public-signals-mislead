@@ -1,7 +1,7 @@
 # How to Run This Analysis
 
-**Time:** 5-10 minutes  
-**Difficulty:** Easy
+Runtime: 5-10 minutes
+Difficulty: easy
 
 Use a repo-local virtualenv from the project root:
 
@@ -53,7 +53,7 @@ ls data/trends/
 
 ## Run the Analysis
 
-### Step 1: Apply Decision Context
+### Apply Decision Context
 
 ```bash
 python scripts/apply_outcomes.py
@@ -79,7 +79,7 @@ This step adds two fields that the rest of the repo depends on:
 
 Those fields are intentionally separate. Removal is observable. True value often is not.
 
-### Step 2: Run the Test Suite
+### Run the Test Suite
 
 ```bash
 python -m pytest tests -v
@@ -91,7 +91,7 @@ Expected result:
 ============================== 46 passed in ...
 ```
 
-### Step 3: Run the Statistical Analysis
+### Run the Statistical Analysis
 
 ```bash
 python src/analysis/statistical_analysis.py
@@ -124,7 +124,7 @@ If you want the repo walkthrough instead of just the commands, start with:
 - `documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md`
 - `documentation/ARCHITECTURE.md`
 
-### Step 4: Generate the Charts
+### Generate the Charts
 
 ```bash
 python scripts/generate_visualizations.py
@@ -133,12 +133,12 @@ python scripts/generate_visualizations.py
 Expected result:
 
 ```text
-✓ VISUALIZATIONS COMPLETE
+OK VISUALIZATIONS COMPLETE
 ```
 
 The HTML files are written to `results/figures/`.
 
-### Step 5: Open a Chart
+### Open a Chart
 
 ```bash
 open results/figures/decay_vs_action.html

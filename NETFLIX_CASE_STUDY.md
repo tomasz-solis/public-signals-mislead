@@ -4,13 +4,13 @@
 
 In May 2023, Netflix began enforcing its password sharing crackdown across markets. Within four weeks of peak search interest, Google Trends data shows a 93.3% decay in searches for "Netflix password sharing."
 
-Reddit discussion was noisy: 37 mentions in the tracked window, with 29.7% classified as negative by our keyword lexicon. Only 10.8% read as positive. The remaining 59.5% were neutral — people asking questions, sharing workarounds, or describing the change without strong sentiment. The overall classification for this feature landed as UNCERTAIN, meaning the public signals were too mixed to call.
+Reddit discussion was noisy: 37 mentions in the tracked window, with 29.7% classified as negative by our keyword lexicon. Only 10.8% read as positive. The remaining 59.5% were neutral - people asking questions, sharing workarounds, or describing the change without strong sentiment. The overall classification for this feature landed as UNCERTAIN, meaning the public signals were too mixed to call.
 
 If you were a product analyst reading only the public signals, the story writes itself:
 
 - search interest collapsed (93.3% decay)
 - Reddit skewed negative (29.7% negative vs 10.8% positive)
-- classification: UNCERTAIN — the signals don't resolve into a clear verdict
+- classification: UNCERTAIN - the signals don't resolve into a clear verdict
 
 The reasonable conclusion: this feature is struggling. Consider rollback.
 
@@ -28,11 +28,11 @@ The public signal and the business outcome pointed in opposite directions.
 
 Three things happened that external data could not capture:
 
-**1. Search decay measured curiosity, not usage.** People searched "Netflix password sharing" to understand the new rules. Once they understood — whether they complied, bought Extra Member, or cancelled — there was no reason to search again. The 93.3% decay reflects resolved information needs, not product failure.
+1. Search decay measured curiosity, not usage. People searched "Netflix password sharing" to understand the new rules. Once they understood - whether they complied, bought Extra Member, or cancelled - there was no reason to search again. The 93.3% decay reflects resolved information needs, not product failure.
 
-**2. Reddit negativity was selection bias.** People who were angry posted. People who paid the extra $8 and moved on did not write about it. The 29.7% negative ratio overstates the actual churn impact because complaint volume does not scale linearly with business harm.
+2. Reddit negativity was selection bias. People who were angry posted. People who paid the extra $8 and moved on did not write about it. The 29.7% negative ratio overstates the actual churn impact because complaint volume does not scale linearly with business harm.
 
-**3. The metric that mattered was invisible.** What Netflix cared about was conversion: how many previously-sharing households converted to paid accounts. That number — embedded in the 9.3M net additions — was never going to appear in Google Trends or Reddit.
+3. The metric that mattered was invisible. What Netflix cared about was conversion: how many previously-sharing households converted to paid accounts. That number - embedded in the 9.3M net additions - was never going to appear in Google Trends or Reddit.
 
 ## The Contrast: Disney+ GroupWatch
 
@@ -55,19 +55,19 @@ Both features show steep decay. Both drew negative attention. The product paths 
 
 ## Where This Fits In The Broader Analysis
 
-Across the full dataset of 36 subscription features, 69% of the features companies continued to support still show more than 80% search decay (95% CI: 44%–86%, n=16). Netflix Password Sharing is one of them — and it's the single clearest case where heavy decay coincided with strong business results.
+Across the full dataset of 36 subscription features, 69% of the features companies continued to support still show more than 80% search decay (95% CI: 44% - 86%, n=16). Netflix Password Sharing is one of them - and it's the single clearest case where heavy decay coincided with strong business results.
 
-The decision framework correctly classifies Netflix Password Sharing as supported (true positive). It also correctly classifies GroupWatch as pulled back (true negative). The framework's two misses are Games and App-Only Membership — both false positives (predicted supported, actually pulled back).
+The decision framework correctly classifies Netflix Password Sharing as supported (true positive). It also correctly classifies GroupWatch as pulled back (true negative). The framework's two misses are Games and App-Only Membership - both false positives (predicted supported, actually pulled back).
 
 ## What Internal Data Would Have Changed The Analysis
 
 If I had been the analyst on the Netflix decision, I would have asked for:
 
-- **Conversion rate**: what percentage of previously-sharing households converted to paid accounts or Extra Member
-- **Churn by segment**: did cancellations spike among sharers, and did they return within 90 days
-- **Revenue per user change**: net ARPU impact after accounting for lost sharers and gained subscribers
-- **Retention cohort**: 30/60/90-day retention of newly-converted accounts vs organically acquired ones
-- **Cost of enforcement**: engineering, support tickets, and brand-perception cost of the crackdown
+- Conversion rate: what percentage of previously-sharing households converted to paid accounts or Extra Member
+- Churn by segment: did cancellations spike among sharers, and did they return within 90 days
+- Revenue per user change: net ARPU impact after accounting for lost sharers and gained subscribers
+- Retention cohort: 30/60/90-day retention of newly-converted accounts vs organically acquired ones
+- Cost of enforcement: engineering, support tickets, and brand-perception cost of the crackdown
 
 None of that is observable from outside. All of it is necessary before recommending rollback.
 

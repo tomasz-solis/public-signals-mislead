@@ -1,6 +1,6 @@
 # Architecture
 
-## Pipeline Overview
+## Pipeline Map
 
 ```text
 data/raw/feature_inventory.csv

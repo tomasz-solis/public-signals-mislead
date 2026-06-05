@@ -4,7 +4,7 @@ Use this when a feature looks weak in search, social, or public discussion and t
 
 ![Static preview of the decision framework](assets/decision_matrix_preview.svg)
 
-## Step 1: Classify The External Signal
+## Classify The External Signal
 
 | Signal pattern | What it may mean | What it does **not** prove |
 |----------------|------------------|-----------------------------|
@@ -13,7 +13,7 @@ Use this when a feature looks weak in search, social, or public discussion and t
 | Low public discussion | Quiet adoption or low cultural salience | Low product value |
 | Public removal discourse | Perceived dissatisfaction | Correctness of rollback |
 
-## Step 2: Ask The Three Questions In Order
+## Ask The Three Questions In Order
 
 1. What is observable externally?
 2. What did the company visibly do next?
@@ -21,7 +21,7 @@ Use this when a feature looks weak in search, social, or public discussion and t
 
 Do not answer question three with question one.
 
-## Step 3: Match The Decision To The Evidence
+## Match The Decision To The Evidence
 
 | Evidence state | Recommended posture |
 |----------------|---------------------|
@@ -31,7 +31,7 @@ Do not answer question three with question one.
 | External calm, strong internal value | Keep supporting. Public quiet is not a failure signal. |
 | Mixed external signals, mixed internal value | Narrow the feature, retarget it, or reduce investment instead of all-or-nothing thinking. |
 
-## Step 4: Require These Internal Inputs Before Rollback
+## Require These Internal Inputs Before Rollback
 
 - adoption by eligible users
 - repeat usage after first exposure

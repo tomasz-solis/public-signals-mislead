@@ -62,7 +62,7 @@ Questions:
 
 - Does the feature matter to a high-value or hard-to-win segment?
 - Does it support brand positioning, ecosystem differentiation, or content strategy?
-- Does it unlock future roadmap moves?
+- Does it enable future roadmap moves?
 
 Why it matters:
 
@@ -95,4 +95,4 @@ I would want, at minimum:
 
 If those are missing, the honest recommendation is not "roll it back." It is:
 
-**We do not yet have enough internal context to justify rollback.**
+We do not yet have enough internal context to justify rollback.

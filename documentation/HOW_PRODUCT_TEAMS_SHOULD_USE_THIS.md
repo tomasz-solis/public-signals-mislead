@@ -9,11 +9,11 @@ Typical trigger moments:
 - a feature looks like it has "lost momentum"
 - leaders want to know whether the team should pull back
 
-The repo is **not** built to answer "should we roll this back?" on its own.
+The repo is not built to answer "should we roll this back?" on its own.
 
 It is built to answer a narrower and more useful question:
 
-**Are we overreading external signals that do not actually tell us whether the feature is worth keeping?**
+Are we overreading external signals that do not actually tell us whether the feature is worth keeping?
 
 ## How To Use It Well
 
