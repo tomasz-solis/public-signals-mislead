@@ -1,42 +1,30 @@
-# Case Study: Netflix Password Sharing
+# Case study: Netflix password sharing
 
-## The Public Signal
+Search interest fell 93.3% within four weeks of peak, and Netflix then reported 9.3M paid net additions. The public signal and the business outcome pointed in opposite directions.
 
-In May 2023, Netflix began enforcing its password sharing crackdown across markets. Within four weeks of peak search interest, Google Trends data shows a 93.3% decay in searches for "Netflix password sharing."
+## The public signal
 
-Reddit discussion was noisy: 37 mentions in the tracked window, with 29.7% classified as negative by our keyword lexicon. Only 10.8% read as positive. The remaining 59.5% were neutral - people asking questions, sharing workarounds, or describing the change without strong sentiment. The overall classification for this feature landed as UNCERTAIN, meaning the public signals were too mixed to call.
+In May 2023 Netflix started enforcing its password-sharing crackdown across markets. Within four weeks of peak, Google Trends shows searches for "Netflix password sharing" down 93.3%.
 
-If you were a product analyst reading only the public signals, the story writes itself:
+Reddit was noisy: 37 mentions in the tracked window, 29.7% negative by our keyword lexicon and 10.8% positive. The other 59.5% were neutral (questions, workarounds, plain descriptions). The overall classification was UNCERTAIN: the signals were too mixed to call.
 
-- search interest collapsed (93.3% decay)
-- Reddit skewed negative (29.7% negative vs 10.8% positive)
-- classification: UNCERTAIN - the signals don't resolve into a clear verdict
+An analyst reading only public signals would see collapsed search interest, negative-leaning Reddit and no clear verdict, and might conclude the feature was struggling and consider a rollback. That would have been wrong.
 
-The reasonable conclusion: this feature is struggling. Consider rollback.
+## What actually happened
 
-That conclusion would have been wrong.
-
-## What Actually Happened
-
-Netflix reported 9.3 million paid net additions in Q1 2024, directly citing the password sharing crackdown and the Extra Member add-on as primary drivers. The company kept the policy, expanded it globally, and described it as a growth success in multiple shareholder letters.
+Netflix reported 9.3 million paid net additions in Q1 2024 and named the crackdown and the Extra Member add-on as main drivers. It kept the policy, expanded it globally and called it a growth success in several shareholder letters.
 
 Source: [Netflix Q1 2024 shareholder letter](https://ir.netflix.net/financials/quarterly-earnings/default.aspx) (Tier 1 evidence).
 
-The public signal and the business outcome pointed in opposite directions.
+## Why the public signal misled
 
-## Why The Public Signal Misled
+1. Search decay measured curiosity, not usage. People searched to understand the new rules. Once they understood (and complied, bought Extra Member or cancelled), there was no reason to search again. The decay reflects answered questions, not product failure.
+2. Reddit negativity was selection bias. Angry people posted. People who paid the extra $8 and moved on didn't. Complaint volume doesn't scale with business harm.
+3. The metric that mattered was invisible. Netflix cared about how many sharing households converted to paid accounts. That number, inside the 9.3M net additions, was never going to show up in Google Trends or Reddit.
 
-Three things happened that external data could not capture:
+## The contrast: Disney+ GroupWatch
 
-1. Search decay measured curiosity, not usage. People searched "Netflix password sharing" to understand the new rules. Once they understood - whether they complied, bought Extra Member, or cancelled - there was no reason to search again. The 93.3% decay reflects resolved information needs, not product failure.
-
-2. Reddit negativity was selection bias. People who were angry posted. People who paid the extra $8 and moved on did not write about it. The 29.7% negative ratio overstates the actual churn impact because complaint volume does not scale linearly with business harm.
-
-3. The metric that mattered was invisible. What Netflix cared about was conversion: how many previously-sharing households converted to paid accounts. That number - embedded in the 9.3M net additions - was never going to appear in Google Trends or Reddit.
-
-## The Contrast: Disney+ GroupWatch
-
-Disney+ GroupWatch shows a similar public-signal pattern but a different product path.
+Similar public signal, different product path:
 
 | Signal | Netflix Password Sharing | Disney+ GroupWatch |
 |--------|--------------------------|-------------------|
@@ -47,42 +35,42 @@ Disney+ GroupWatch shows a similar public-signal pattern but a different product
 | Company action | Supported | Pulled back |
 | Business outcome | Positive (9.3M subs) | Unknown |
 
-GroupWatch was quietly removed in September 2023 based on a help-center notice. No public earnings mention, no stated audience impact, no revenue attribution. Whether the feature had value for a niche audience remains unknown.
+GroupWatch was quietly removed in September 2023, according to a help-center notice. No earnings mention, no stated audience impact, no revenue attribution. Whether it had value for a niche audience is unknown.
 
 Source: [Disney+ help-center notice via ComicBook](https://comicbook.com/irl/news/disney-plus-groupwatch-feature-no-longer-available/) (Tier 2 evidence).
 
-Both features show steep decay. Both drew negative attention. The product paths diverged completely. That is the problem this repo studies.
+Both show steep decay and negative attention, and their product paths split completely. That is what this repo studies.
 
-## Where This Fits In The Broader Analysis
+## Where it fits in the wider analysis
 
-Across the full dataset of 36 subscription features, 69% of the features companies continued to support still show more than 80% search decay (95% CI: 44% - 86%, n=16). Netflix Password Sharing is one of them - and it's the single clearest case where heavy decay coincided with strong business results.
+Across 36 subscription features, 69% of those companies kept supporting still show more than 80% search decay (95% CI 44% to 86%, n=16). Netflix Password Sharing is one of them, and the clearest case of heavy decay alongside strong business results.
 
-The decision framework correctly classifies Netflix Password Sharing as supported (true positive). It also correctly classifies GroupWatch as pulled back (true negative). The framework's two misses are Games and App-Only Membership - both false positives (predicted supported, actually pulled back).
+The decision framework classifies Netflix Password Sharing correctly as supported (true positive) and GroupWatch correctly as pulled back (true negative). Its two misses are Games and App-Only Membership, both false positives (predicted supported, actually pulled back).
 
-## What Internal Data Would Have Changed The Analysis
+## Internal data that would have changed the analysis
 
-If I had been the analyst on the Netflix decision, I would have asked for:
+As the analyst on this decision, I'd have asked for:
 
-- Conversion rate: what percentage of previously-sharing households converted to paid accounts or Extra Member
-- Churn by segment: did cancellations spike among sharers, and did they return within 90 days
-- Revenue per user change: net ARPU impact after accounting for lost sharers and gained subscribers
-- Retention cohort: 30/60/90-day retention of newly-converted accounts vs organically acquired ones
-- Cost of enforcement: engineering, support tickets, and brand-perception cost of the crackdown
+- Conversion: the share of sharing households that moved to paid accounts or Extra Member.
+- Churn by segment: did cancellations spike among sharers, and did they come back within 90 days?
+- Revenue per user: net ARPU after lost sharers and new subscribers.
+- Retention cohorts: 30/60/90-day retention of converted accounts vs organically acquired ones.
+- Cost of enforcement: engineering, support tickets and brand cost.
 
-None of that is observable from outside. All of it is necessary before recommending rollback.
+None of it is visible from outside, and all of it is needed before recommending a rollback.
 
-## The Transferable Lesson
+## The lesson
 
-This is not a story about Netflix being right or Disney being wrong. It is a story about what public data can and cannot tell you.
+This isn't about Netflix being right or Disney being wrong. It's about what public data can and can't tell you.
 
-Public signals resolve faster than product value does. Search interest decays in weeks. Retention impact takes quarters to measure. A feature can look dead in Google Trends while silently driving the best subscriber quarter in a company's recent history.
+Public signals settle faster than product value. Search interest fades in weeks; retention takes quarters to measure. A feature can look dead in Google Trends while driving the best subscriber quarter in years.
 
-The practical rule: external concern without internal evidence should trigger investigation, not rollback.
+Rule of thumb: outside concern without internal evidence should trigger an investigation, not a rollback.
 
-## Data Sources
+## Data sources
 
-- Search decay: Google Trends data collected via `pytrends`, peak-based methodology (`src/data_collection/recalculate_with_peaks.py`)
-- Reddit sentiment: keyword-based lexicon applied to company subreddit mentions (`src/data_collection/reddit/reddit_validator.py`). See the [sentiment methodology note](../README.md#sentiment-methodology) for why the crude method is a deliberate choice.
-- Business outcome: Netflix Q1 2024 shareholder letter ([source](https://ir.netflix.net/financials/quarterly-earnings/default.aspx))
-- GroupWatch removal: Disney+ help-center notice ([source](https://comicbook.com/irl/news/disney-plus-groupwatch-feature-no-longer-available/))
-- Framework validation: `src/analysis/statistical_analysis.py` → `framework_error_analysis()`
+- Search decay: Google Trends via `pytrends`, peak-based method (`src/data_collection/recalculate_with_peaks.py`).
+- Reddit sentiment: keyword lexicon on company subreddit mentions (`src/data_collection/reddit/reddit_validator.py`). The [sentiment method note](README.md#sentiment-method) explains why the crude method is deliberate.
+- Business outcome: Netflix Q1 2024 shareholder letter ([source](https://ir.netflix.net/financials/quarterly-earnings/default.aspx)).
+- GroupWatch removal: Disney+ help-center notice ([source](https://comicbook.com/irl/news/disney-plus-groupwatch-feature-no-longer-available/)).
+- Framework validation: `framework_error_analysis()` in `src/analysis/statistical_analysis.py`.

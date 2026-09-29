@@ -1,59 +1,37 @@
-# How to Run This Analysis
+# How to run the analysis
 
-Runtime: 5-10 minutes
-Difficulty: easy
-
-Use a repo-local virtualenv from the project root:
+Takes 5 to 10 minutes. Run everything from the project root.
 
 ## Setup
 
-### 1. Clone or Download
+1. Clone the repo:
 
-```bash
-git clone https://github.com/yourusername/public-signals-mislead.git
-cd public-signals-mislead
-```
+   ```bash
+   git clone https://github.com/tomasz-solis/public-signals-mislead.git
+   cd public-signals-mislead
+   ```
 
-### 2. Create and Install the Project Environment
+2. Create a local virtualenv and install the project:
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install -e .
-```
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   python -m pip install -e .
+   python -m pip install -e '.[dev]'   # optional, for tests
+   ```
 
-Optional, if you want to run tests too:
+3. Optional, only to re-collect Reddit data: copy `.env.example` to `.env` and fill in the Reddit API credentials. The analysis runs without this because the collected data is already in the repo.
 
-```bash
-python -m pip install -e '.[dev]'
-```
+4. Check the data is there:
 
-If the repo was moved after `venv` was created and activation starts behaving strangely, rebuild it:
+   ```bash
+   ls data/validation/labeled_features.csv
+   ls data/trends/
+   ```
 
-```bash
-./scripts/rebuild_venv.sh
-```
+## Run the analysis
 
-### 2.5 Environment Setup (Optional)
-
-This is only needed if you want to re-collect Reddit data.
-
-```bash
-cp .env.example .env
-```
-
-Fill in the Reddit API credentials in `.env`. The analysis itself runs fine without this because the collected data is already in the repo.
-
-### 3. Verify the Data Files
-
-```bash
-ls data/validation/labeled_features.csv
-ls data/trends/
-```
-
-## Run the Analysis
-
-### Apply Decision Context
+### 1. Apply decision context
 
 ```bash
 python scripts/apply_outcomes.py
@@ -72,26 +50,17 @@ Known business outcome coverage:
   Unknown: 27
 ```
 
-This step adds two fields that the rest of the repo depends on:
+This adds the two fields the rest of the repo depends on: `company_action` (what the public record suggests the company did) and `business_outcome` (what the public record can prove about value). They are kept apart on purpose.
 
-- `company_action`: what the public record suggests the company did
-- `business_outcome`: what the public record can actually prove about value
-
-Those fields are intentionally separate. Removal is observable. True value often is not.
-
-### Run the Test Suite
+### 2. Run the tests
 
 ```bash
 python -m pytest tests -v
 ```
 
-Expected result:
+All tests should pass.
 
-```text
-============================== 46 passed in ...
-```
-
-### Run the Statistical Analysis
+### 3. Run the statistics
 
 ```bash
 python src/analysis/statistical_analysis.py
@@ -99,13 +68,13 @@ python src/analysis/statistical_analysis.py
 
 What to look for:
 
-- `Search Decay - Supported vs Pulled Back` uses Mann-Whitney U as the primary test
-- the Bonferroni threshold is shown explicitly
-- the power analysis explains that the study can only detect very large effects
-- the sensitivity section shows how the high-decay share changes from 50% to 95%
-- the framework validation compares the decision rules against a majority-class baseline
-- the signal ablation table shows whether combined signals outperform single-signal rules
-- the observability note explains that `company_action` is more visible than true value
+- `Search Decay - Supported vs Pulled Back` uses Mann-Whitney U as the main test.
+- The Bonferroni threshold is shown.
+- The power analysis explains that only very large effects are detectable.
+- The sensitivity section shows how the high-decay share changes from 50% to 95%.
+- The framework validation compares the decision rules with a majority-class baseline.
+- The signal ablation table shows whether combined signals beat single-signal rules.
+- The observability note explains that `company_action` is easier to see than true value.
 
 Current headline output:
 
@@ -118,89 +87,41 @@ KEY FINDING: 11 supported features above 80% decay (69%)
 
 The script also updates `data/validation/statistical_results.csv`.
 
-If you want the repo walkthrough instead of just the commands, start with:
-
-- `README.md`
-- `documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md`
-- `documentation/ARCHITECTURE.md`
-
-### Generate the Charts
+### 4. Generate the charts
 
 ```bash
 python scripts/generate_visualizations.py
 ```
 
-Expected result:
+It prints `OK VISUALIZATIONS COMPLETE` and writes HTML files to `results/figures/`. Open one with `open results/figures/decay_vs_action.html` (macOS), `start` (Windows) or `xdg-open` (Linux).
 
-```text
-OK VISUALIZATIONS COMPLETE
-```
+For a walkthrough instead of commands, read `README.md`, `documentation/HOW_PRODUCT_TEAMS_SHOULD_USE_THIS.md` and `documentation/ARCHITECTURE.md`.
 
-The HTML files are written to `results/figures/`.
-
-### Open a Chart
-
-```bash
-open results/figures/decay_vs_action.html
-```
-
-Use `start` on Windows or `xdg-open` on Linux.
-
-## One-Command Option
+## One command
 
 ```bash
 ./run_analysis.sh
 ```
 
-That script now detects `python` vs `python3` automatically and installs the local package in editable mode when needed.
+It picks `python` or `python3` and installs the package in editable mode if needed.
 
 ## Troubleshooting
 
-### `python: command not found`
+| Problem | Fix |
+|---|---|
+| `python: command not found` | Use `python3`. |
+| `(venv)` shows but `python` isn't found | The virtualenv was created before the repo was moved or renamed. Delete `venv` and repeat setup step 2. |
+| `ModuleNotFoundError` | Reinstall: `python -m pip install -e .` |
+| `pytest` is missing | Install the dev extra: `python -m pip install -e '.[dev]'` |
+| Charts are missing after cloning | They are generated, not tracked. Run `python scripts/generate_visualizations.py`. |
 
-Use `python3` instead.
+Why is `business_outcome` so often `UNKNOWN`? By design. The repo is about decision risk, not predicting business outcomes. Public sources often show whether a feature was kept or pulled back, but rarely its real value.
 
-### `(venv)` is shown, but `python` still is not found
+## Re-collecting data (optional)
 
-The virtualenv was probably created before the repo was moved or renamed. Rebuild it:
+Not needed for normal use; work from the provided data. The pipeline is still there.
 
-```bash
-./scripts/rebuild_venv.sh
-```
-
-### `ModuleNotFoundError`
-
-Reinstall the local package:
-
-```bash
-python -m pip install -e .
-```
-
-### `pytest` is missing
-
-Install the dev extra:
-
-```bash
-python -m pip install -e '.[dev]'
-```
-
-### Charts are missing after clone
-
-They are generated artifacts now, not tracked files. Rebuild them with:
-
-```bash
-python scripts/generate_visualizations.py
-```
-
-### Why does the repo keep `business_outcome = UNKNOWN` so often?
-
-That is by design. The repo is framed around product-decision risk, not full business-outcome prediction. Public sources often reveal whether a feature was kept or pulled back, but they usually do not reveal the real value of the feature.
-
-## Optional Recollection
-
-You do not need this for the portfolio version, but the pipeline is still there.
-
-### Google Trends
+Google Trends:
 
 ```bash
 python src/data_collection/create_batches.py
@@ -209,12 +130,10 @@ python src/data_collection/merge_batches.py
 python src/data_collection/recalculate_with_peaks.py --input data/trends/MERGED_trends_data.csv
 ```
 
-Collection runs now write structured logs to `data/collection.log`.
+Collection runs write logs to `data/collection.log`.
 
-### Reddit Validation
+Reddit validation:
 
 ```bash
 python src/data_collection/reddit/validate_features.py --companies "Netflix"
 ```
-
-Bottom line: for normal use, skip recollection and work from the provided data.

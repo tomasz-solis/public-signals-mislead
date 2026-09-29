@@ -1,98 +1,23 @@
-# What Internal Data I Would Require Before Recommending Rollback
+# Internal data I'd need before recommending a rollback
 
-External signals can tell me that something looks noisy, controversial, or quiet. They cannot tell me whether a rollback is the right move.
+Outside signals show that something looks noisy, controversial or quiet. They can't show whether a rollback is right. I'd want evidence in six areas.
 
-Before recommending rollback, I would want evidence in six buckets.
+| Area | Questions | Why it matters |
+|---|---|---|
+| 1. Adoption | How many eligible users tried it? How fast did adoption ramp? Which segments adopted most? | A feature can matter a lot to a small segment and still look quiet in public. Low attention isn't low reach. |
+| 2. Repeat usage | Do users come back after first use? Is it becoming a habit, occasional or abandoned? Is usage deepening in any important cohort? | A short search spike is normal. Habit is a better sign of lasting value than launch buzz. |
+| 3. Retention and churn | Do exposed users retain better than comparable unexposed users? Does it cut churn in any segment? Does it improve plan stickiness or renewal? | Some features don't drive daily use but still improve retention, and they're easy to undervalue from public signals. |
+| 4. Monetisation | Does it drive upgrades, add-ons or pricing power? Does it lift trial-to-paid conversion? Does it support ARPU or long-run revenue? | A quiet feature can still make the business stronger, and public discussion rarely shows monetisation. |
+| 5. Strategic and segment value | Does it matter to a high-value or hard-to-win segment? Does it support positioning, ecosystem differentiation or content strategy? Does it enable later roadmap moves? | Not every feature should be judged on broad, immediate adoption. Some earn their place through strategic fit. |
+| 6. Cost and operational burden | What does maintenance cost? What complexity does it add to nearby systems? What roadmap tradeoffs does keeping it create? | Keeping a feature isn't free. The decision needs a real cost side, not only a signal side. |
 
-## 1. Adoption
+## Minimum before a rollback
 
-Questions:
+- Adoption by eligible users.
+- Repeat usage after first exposure.
+- A retention or churn comparison.
+- Monetisation contribution, where relevant.
+- A maintenance cost estimate.
+- A read by segment, not only overall averages.
 
-- How many eligible users tried the feature?
-- How fast did adoption ramp after launch?
-- Which segments adopted it most?
-
-Why it matters:
-
-- a feature can matter a lot to a small segment and still look quiet in public
-- low public attention is not the same as low product reach
-
-## 2. Repeat Usage
-
-Questions:
-
-- Do users come back after first use?
-- Is the feature becoming habitual, occasional, or abandoned?
-- Is usage deepening in any important cohort?
-
-Why it matters:
-
-- a short-lived search spike is normal
-- habit formation is a better indicator of durable value than launch buzz
-
-## 3. Retention And Churn
-
-Questions:
-
-- Do exposed users retain better than comparable unexposed users?
-- Does the feature reduce churn in any segment?
-- Does it improve plan stickiness or subscription renewal?
-
-Why it matters:
-
-- some features do not drive daily usage but still improve retention
-- those are easy to undervalue from public signals alone
-
-## 4. Monetization
-
-Questions:
-
-- Does the feature drive plan upgrades, add-ons, or pricing power?
-- Does it increase conversion from trial to paid?
-- Does it support ARPU or long-run revenue quality?
-
-Why it matters:
-
-- a feature can look quiet and still make the business stronger
-- public discussion rarely reveals monetization clearly
-
-## 5. Strategic And Segment Value
-
-Questions:
-
-- Does the feature matter to a high-value or hard-to-win segment?
-- Does it support brand positioning, ecosystem differentiation, or content strategy?
-- Does it enable future roadmap moves?
-
-Why it matters:
-
-- not every feature should be judged only by broad immediate adoption
-- some features earn their keep through strategic fit
-
-## 6. Cost And Operational Burden
-
-Questions:
-
-- What is the maintenance cost?
-- What is the complexity tax on adjacent systems?
-- What roadmap tradeoffs does continued support create?
-
-Why it matters:
-
-- keeping a feature is not free
-- a team still needs a real cost side of the decision, not just a signal side
-
-## Minimum Standard Before Rollback
-
-I would want, at minimum:
-
-- adoption by eligible users
-- repeat usage after first exposure
-- retention or churn comparison
-- monetization contribution where relevant
-- maintenance cost estimate
-- segment-level read, not just overall averages
-
-If those are missing, the honest recommendation is not "roll it back." It is:
-
-We do not yet have enough internal context to justify rollback.
+If these are missing, the honest recommendation isn't "roll it back". It's "we don't have enough internal context to justify a rollback yet."

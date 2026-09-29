@@ -1,109 +1,62 @@
-# Project Impact
+# Project impact
 
-This project is a decision-quality analysis of public product signals. It asks a
-simple product question: when search interest or public commentary drops, how
-much should a team infer from that?
-
-The answer is deliberately narrow. Public signals can be useful early-warning
-inputs, but they are weak standalone evidence for product value. In this sample,
-features that companies continued to support often looked poor in public-signal
-terms. That does not prove the features succeeded. It means the outside record is
-too thin to treat search decay or online reaction as a verdict.
+When search interest or public commentary drops, how much should a product team read into it? Not much on its own. Public signals are useful early warnings but weak evidence of product value. In this sample, features that companies kept supporting often looked poor on public signals. That doesn't prove they succeeded; it means the outside record is too thin to treat search decay or online reaction as a verdict.
 
 ## Claim
 
-The repo supports this claim:
+The repo supports this:
 
-- public signals are noisy inputs for product decisions
-- company action is often observable from outside the company
-- true business outcome is often not observable
-- a rollback is visible, but it does not prove the feature never had value
-- a supported feature can still have steep public attention decay
+- Public signals are noisy inputs for product decisions.
+- Company action is often visible from outside.
+- True business outcome often isn't.
+- A rollback is visible, but it doesn't prove the feature never had value.
+- A supported feature can still show steep decay in public attention.
 
-The repo does not prove that any product team made the wrong call. That would
-require internal usage, retention, margin, strategic, and operational data. The
-point is to separate what the public record can show from what it cannot.
+It doesn't prove any team made the wrong call. That would need internal usage, retention, margin, strategy and operational data.
 
 ## Evidence
 
-Dataset:
+Dataset: 36 subscription features across major streaming and subscription platforms. 20 have public decision context, 19 have an action label for the main comparison, and 9 have a known business outcome.
 
-- 36 subscription features across major streaming and subscription platforms
-- 20 features with public decision context
-- 19 features with an action label usable in the main comparison
-- 9 features with a known business outcome
+| Result | Value |
+|---|---|
+| Supported features, average search decay | `83.7%` |
+| Pulled-back features, average search decay | `92.1%` |
+| Mann-Whitney U p-value | `0.284` |
+| Supported features with more than 80% decay | `69%` |
 
-Main result:
+The pulled-back group is small (`n=3`), so the study is underpowered for modest effects. Read it with caution.
 
-- Supported features: `83.7%` average search decay
-- Pulled-back features: `92.1%` average search decay
-- Mann-Whitney U p-value: `0.284`
-- `69%` of supported features still show more than `80%` decay
+## Why it matters
 
-The pulled-back group is small (`n=3`), so the study is underpowered for modest
-effects. The right reading is caution, not certainty.
+Product teams see some version of this: search interest collapsed, Reddit or press turned negative, the feature stopped being discussed, and leadership wants to know whether to keep investing. Those signals should start an investigation, not end it. A good decision brings in internal usage, cohort retention, revenue effect, support load, strategic fit and the cost of undoing the work.
 
-## Why It Matters
+## Analytical choices
 
-Product teams often see a version of this problem:
+The strongest part is the labelling discipline:
 
-- search interest collapsed
-- Reddit or press reaction turned negative
-- the feature stopped being discussed publicly
-- leadership wants to know whether to keep investing
+- `company_action` records what the company appears to do.
+- `business_outcome` records what the public record can prove.
+- `UNKNOWN` is a real state when evidence is thin.
 
-Those signals should start an investigation. They should not end it. A mature
-decision would bring in internal usage, cohort retention, revenue effect,
-support load, strategic fit, and the cost of undoing the work.
+That avoids forcing every feature into success or failure and keeps the statistical claim small and defensible.
 
-## Analytical Choices
+## What it demonstrates
 
-The strongest part of the repo is the labeling discipline:
+| Area | What the repo does |
+|---|---|
+| Decision analysis | Frames the question around decision quality, challenges a tempting causal story, separates observable action from hidden value, reports power limits openly |
+| Statistics | Mann-Whitney U for the small-sample primary comparison, Welch's t-test and effect sizes as context, bootstrap confidence intervals, power analysis, Spearman correlation for bounded non-normal features |
+| Product judgment | Treats public commentary as a weak signal, keeps ambiguous cases instead of over-labelling, turns the result into a rule: investigate before rolling back |
 
-- `company_action` captures what the company appears to do
-- `business_outcome` captures what the public record can actually prove
-- `UNKNOWN` is kept as a real state when the evidence is thin
+## How to describe it
 
-That avoids the common mistake of forcing every feature into a clean
-success/failure label. It also keeps the statistical claim smaller and more
-defensible.
+Safest summary:
 
-## What This Demonstrates
+> A decision-support analysis of 36 subscription features showing why public signals such as search decay and online commentary should not be used as standalone evidence for product value.
 
-Decision analysis:
+The operating lesson:
 
-- frames the question around decision quality, not model novelty
-- challenges a tempting causal story
-- separates observable action from hidden value
-- reports the power limits instead of hiding them
+> External signals are useful for triage. They are not enough for a product verdict without internal context.
 
-Statistical work:
-
-- Mann-Whitney U for the small-sample primary comparison
-- Welch's t-test and effect sizes as secondary context
-- bootstrap confidence intervals
-- power analysis
-- Spearman correlation for bounded, non-normal features
-
-Product judgment:
-
-- treats public commentary as a weak signal rather than product truth
-- keeps ambiguous cases instead of over-labeling them
-- converts the result into a decision rule: investigate before rollback
-
-## How To Position The Repo
-
-The safest summary is:
-
-> A decision-support analysis of 36 subscription features showing why public
-> signals such as search decay and online commentary should not be used as
-> standalone evidence for product value.
-
-The sharper operating lesson is:
-
-> External signals are useful for triage. They are not enough for a product
-> verdict without internal context.
-
-Avoid claiming that the project predicts product success or proves teams made bad
-decisions. The evidence does not support that. The value is the discipline of
-reasoning under incomplete information.
+Don't claim it predicts product success or proves teams decided badly. The evidence doesn't support that. The value is disciplined reasoning with incomplete information.

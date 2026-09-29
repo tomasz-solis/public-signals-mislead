@@ -1,6 +1,6 @@
 # Architecture
 
-## Pipeline Map
+## Pipeline
 
 ```text
 data/raw/feature_inventory.csv
@@ -36,80 +36,23 @@ data/validation/labeled_features.csv
         +--> scripts/generate_visualizations.py
 ```
 
-## What Each Stage Does
+## What each stage does
 
-`create_batches.py`
-- Splits the inventory into collection-friendly batches because Google Trends rate-limits aggressively.
+| Stage | What it does |
+|---|---|
+| `create_batches.py` | Splits the inventory into batches, because Google Trends rate-limits hard. |
+| `collect_trends_data.py` | Collects raw Google Trends interest over time and computes launch-based decay (used earlier in the pipeline). |
+| `merge_batches.py` | Merges batch outputs into one dataset. Extended-window files override the default for the same feature. |
+| `recalculate_with_peaks.py` | Recomputes decay from the actual peak date instead of the launch date. This is the more defensible measure, because many features peak after launch. |
+| `reddit/validate_features.py` | Collects Reddit mentions and simple sentiment. These are public reaction signals, not proof of value. |
+| `create_labeled_dataset.py` | Joins trends metrics and Reddit signals into one table. Adds public-signal labels only. |
+| `apply_outcomes.py` | Adds public decision context from `config/outcomes.py`, keeping `company_action` apart from `business_outcome`. |
+| `statistical_analysis.py` | Compares supported and pulled-back features: group tests, effect sizes, bootstrap CIs, power analysis, threshold sensitivity, framework validation and signal ablation. |
+| `generate_visualizations.py` | Builds local interactive HTML charts and static SVG previews for GitHub. |
 
-`collect_trends_data.py`
-- Collects raw Google Trends interest-over-time data.
-- Computes launch-based decay metrics used earlier in the pipeline.
+## Design choices
 
-`merge_batches.py`
-- Merges batch outputs into one trends dataset.
-- Applies an override rule when extended-window files exist for the same feature.
-
-`recalculate_with_peaks.py`
-- Recomputes decay from the actual peak date rather than the launch date.
-- This is the more defensible version of decay because many features peak after launch.
-
-`reddit/validate_features.py`
-- Collects Reddit mentions and simple sentiment signals.
-- These are public reaction signals, not proof of product value.
-
-`create_labeled_dataset.py`
-- Joins trends metrics and Reddit signals into one analysis table.
-- Adds public-signal labels only.
-
-`apply_outcomes.py`
-- Adds public decision context from `config/outcomes.py`.
-- Separates `company_action` from `business_outcome`.
-
-`statistical_analysis.py`
-- Compares supported vs pulled-back features.
-- Runs group tests, effect sizes, bootstrap CI, power analysis, threshold sensitivity, framework validation, and signal ablation.
-
-`generate_visualizations.py`
-- Produces local interactive HTML charts for exploration.
-- Also writes static SVG previews for GitHub-rendered docs.
-
-## Key Design Choices
-
-### 1. Company action and business outcome are separate
-
-This repo does not force every feature into a fake success/failure label.
-
-- `company_action` is what the public record suggests the company did
-- `business_outcome` is what the public record can actually prove about value
-
-That separation is the backbone of the analysis.
-
-### 2. Peak-based decay matters
-
-Launch-date decay is easy to calculate and often wrong.
-
-If a feature peaks later because of word of mouth, marketing, or a tentpole event, launch-date decay understates persistence. The peak-based recalculation step exists to avoid that distortion.
-
-### 3. Public signals are treated as noisy inputs
-
-Search interest, mention volume, and sentiment can reveal:
-
-- attention
-- confusion
-- backlash
-- cultural salience
-
-They cannot directly reveal:
-
-- retention lift
-- monetization impact
-- segment-level strategic value
-
-That is why the repo frames the output as decision support, not product truth.
-
-### 4. Static and interactive outputs are kept separate
-
-- Interactive Plotly HTML stays in `results/figures/` and is regenerated locally
-- Static SVG previews live in `documentation/assets/` for GitHub readability
-
-This keeps the repo clean without hiding the visuals from reviewers.
+1. Company action and business outcome are separate. The repo doesn't force every feature into a fake success or failure label. `company_action` is what the public record suggests the company did; `business_outcome` is what it can prove about value.
+2. Decay is measured from the peak. Launch-date decay is easy and often wrong. If a feature peaks later (word of mouth, marketing, a big event), launch-date decay understates persistence.
+3. Public signals are noisy inputs. Search interest, mention volume and sentiment can show attention, confusion, backlash and cultural visibility. They can't show retention lift, monetisation or strategic value for a segment. So the output is decision support, not product truth.
+4. Static and interactive charts are kept apart. Interactive Plotly HTML is regenerated locally in `results/figures/`. Static SVG previews live in `documentation/assets/` so reviewers see them on GitHub.
